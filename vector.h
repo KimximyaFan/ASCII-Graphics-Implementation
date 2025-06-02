@@ -78,10 +78,6 @@ public:
     }
 };
 
-
-
-#include <cmath>
-
 class Vec4
 {
 public:
