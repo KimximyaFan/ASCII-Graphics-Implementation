@@ -1,0 +1,148 @@
+#include "vector.h"
+
+Vec3::Vec3(float x, float y, float z) : x(x), y(y), z(z) {}
+
+Vec3 Vec3::operator+(const Vec3& other) const
+{
+    return Vec3(x + other.x, y + other.y, z + other.z);
+}
+
+Vec3& Vec3::operator+=(const Vec3& other)
+{
+    x += other.x; y += other.y; z += other.z;
+    return *this;
+}
+
+Vec3 Vec3::operator-(const Vec3& other) const
+{
+    return Vec3(x - other.x, y - other.y, z - other.z);
+}
+
+Vec3& Vec3::operator-=(const Vec3& other)
+{
+    x -= other.x; y -= other.y; z -= other.z;
+    return *this;
+}
+
+Vec3 Vec3::operator*(float scalar) const
+{
+    return Vec3(x * scalar, y * scalar, z * scalar);
+}
+
+Vec3& Vec3::operator*=(float scalar)
+{
+    x *= scalar; y *= scalar; z *= scalar;
+    return *this;
+}
+
+Vec3 Vec3::operator/(float scalar) const
+{
+    return Vec3(x / scalar, y / scalar, z / scalar);
+}
+
+Vec3& Vec3::operator/=(float scalar)
+{
+    x /= scalar; y /= scalar; z /= scalar;
+    return *this;
+}
+
+bool Vec3::operator==(const Vec3& other) const
+{
+    return x == other.x && y == other.y && z == other.z;
+}
+
+float Vec3::Dot(const Vec3& other) const
+{
+    return x * other.x + y * other.y + z * other.z;
+}
+
+Vec3 Vec3::Cross(const Vec3& other) const
+{
+    return Vec3(
+        y * other.z - z * other.y,
+        z * other.x - x * other.z,
+        x * other.y - y * other.x
+    );
+}
+
+float Vec3::Length() const
+{
+    return std::sqrt(x * x + y * y + z * z);
+}
+
+Vec3 Vec3::Normalize()
+{
+    float len = Length();
+    return len != 0 ? *this / len : Vec3(0, 0, 0);
+}
+
+// =====================
+// Vec4
+// =====================
+
+Vec4::Vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+
+Vec4 Vec4::operator+(const Vec4& other) const
+{
+    return Vec4(x + other.x, y + other.y, z + other.z, w + other.w);
+}
+
+Vec4& Vec4::operator+=(const Vec4& other)
+{
+    x += other.x; y += other.y; z += other.z; w += other.w;
+    return *this;
+}
+
+Vec4 Vec4::operator-(const Vec4& other) const
+{
+    return Vec4(x - other.x, y - other.y, z - other.z, w - other.w);
+}
+
+Vec4& Vec4::operator-=(const Vec4& other)
+{
+    x -= other.x; y -= other.y; z -= other.z; w -= other.w;
+    return *this;
+}
+
+Vec4 Vec4::operator*(float scalar) const
+{
+    return Vec4(x * scalar, y * scalar, z * scalar, w * scalar);
+}
+
+Vec4& Vec4::operator*=(float scalar)
+{
+    x *= scalar; y *= scalar; z *= scalar; w *= scalar;
+    return *this;
+}
+
+Vec4 Vec4::operator/(float scalar) const
+{
+    return Vec4(x / scalar, y / scalar, z / scalar, w / scalar);
+}
+
+Vec4& Vec4::operator/=(float scalar)
+{
+    x /= scalar; y /= scalar; z /= scalar; w /= scalar;
+    return *this;
+}
+
+bool Vec4::operator==(const Vec4& other) const
+{
+    return x == other.x && y == other.y && z == other.z && w == other.w;
+}
+
+float Vec4::Dot(const Vec4& other) const
+{
+    return x * other.x + y * other.y + z * other.z + w * other.w;
+}
+
+float Vec4::Length() const
+{
+    return std::sqrt(x * x + y * y + z * z + w * w);
+}
+
+Vec4 Vec4::Normalize()
+{
+    float len = Length();
+    return len == 0 ? Vec4(0, 0, 0, 0) : *this / len;
+}
