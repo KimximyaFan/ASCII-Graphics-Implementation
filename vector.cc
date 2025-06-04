@@ -51,17 +51,17 @@ bool Vec3::operator==(const Vec3& other) const
     return x == other.x && y == other.y && z == other.z;
 }
 
-float Vec3::Dot(const Vec3& other) const
+float Vec3::Dot(const Vec3& a, const Vec3& b)
 {
-    return x * other.x + y * other.y + z * other.z;
+    return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-Vec3 Vec3::Cross(const Vec3& other) const
+Vec3 Vec3::Cross(const Vec3& a, const Vec3& b)
 {
     return Vec3(
-        y * other.z - z * other.y,
-        z * other.x - x * other.z,
-        x * other.y - y * other.x
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
     );
 }
 
@@ -74,6 +74,12 @@ Vec3 Vec3::Normalize()
 {
     float len = Length();
     return len != 0 ? *this / len : Vec3(0, 0, 0);
+}
+
+Vec3 Vec3::Normalize(const Vec3& a)
+{
+    float len = a.Length();
+    return len != 0 ? a / len : Vec3(0, 0, 0);
 }
 
 // =====================
@@ -131,9 +137,9 @@ bool Vec4::operator==(const Vec4& other) const
     return x == other.x && y == other.y && z == other.z && w == other.w;
 }
 
-float Vec4::Dot(const Vec4& other) const
+float Vec4::Dot(const Vec4& a, const Vec4& b)
 {
-    return x * other.x + y * other.y + z * other.z + w * other.w;
+    return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;
 }
 
 float Vec4::Length() const
@@ -145,4 +151,10 @@ Vec4 Vec4::Normalize()
 {
     float len = Length();
     return len == 0 ? Vec4(0, 0, 0, 0) : *this / len;
+}
+
+Vec4 Vec4::Normalize(const Vec4& a)
+{
+    float len = a.Length();
+    return len == 0 ? Vec4(0, 0, 0, 0) : a / len;
 }

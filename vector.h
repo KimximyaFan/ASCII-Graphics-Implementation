@@ -23,11 +23,15 @@ public:
 
     bool operator==(const Vec3& other) const;
 
-    float Dot(const Vec3& other) const;
-    Vec3 Cross(const Vec3& other) const;
-
     float Length() const;
+
     Vec3 Normalize();
+
+    static float Dot(const Vec3& a, const Vec3& b);
+
+    static Vec3 Cross(const Vec3& a, const Vec3& b);
+
+    static Vec3 Normalize(const Vec3& a);
 };
 
 class Vec4
@@ -51,7 +55,11 @@ public:
 
     bool operator==(const Vec4& other) const;
 
-    float Dot(const Vec4& other) const;
     float Length() const;
+
     Vec4 Normalize();
+
+    static float Dot(const Vec4& a, const Vec4& b);
+
+    static Vec4 Normalize(const Vec4& a);
 };

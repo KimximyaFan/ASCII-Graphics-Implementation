@@ -226,3 +226,96 @@ Mat4x4 Mat4x4::RotationZ(float angle) {
     mat.m[1][1] = c;
     return mat;
 }
+
+/*
+    cot(0.5*theta)/aspect               0            0               0
+                        0  cot(0.5*theta)            0               0
+                        0               0  (n+f)/(n-f)  (-2*n*f)/(n-f)
+                        0               0           -1               0
+*/
+Mat4x4 Mat4x4::Perspective(float fov, float aspect, float near, float far)
+{
+    Mat4x4 mat;
+    float cot_value = 1.0f / std::tan(fov/2);
+    float inverse_near_minus_far = 1.0f / (near-far);
+
+    mat.m[0][0] = cot_value / aspect;
+    mat.m[1][1] = cot_value;
+    mat.m[2][2] = (far + near) * inverse_near_minus_far;
+    mat.m[2][3] = (-2 * far * near) * inverse_near_minus_far;
+    mat.m[3][2] = -1.0f;
+
+    return mat;
+}
+
+/*
+    1. set 'camera position' and 'look at position'
+
+    2. make vector n from that two position, this is z axis
+
+    3. make vector u by cross up and n, this is x axis
+    (up vector is usually <0, 1, 0> )
+
+    4. make vector v by cross n and u, this is y axis
+
+    5. u v n coordinate completed
+
+    |  Ux  Uy  Uz  -dot(U, eye) |
+    |  Vx  Vy  Vz  -dot(V, eye) |
+    |  Nx  Ny  Nz  -dot(N, eye) |
+    |   0   0   0      1        |
+*/
+Mat4x4 Mat4x4::LookAt(const Vec3& camera_pos, const Vec3& look_at_pos, const Vec3& up)
+{
+    Vec3 n = Vec3::Normalize(camera_pos - look_at_pos);
+    Vec3 u = Vec3::Normalize( Vec3::Cross(up, n) );
+    Vec3 v = Vec3::Cross( n, u );
+
+    Mat4x4 mat = Identity();
+
+    mat.m[0][0] = u.x;  mat.m[0][1] = u.y;  mat.m[0][2] = u.z;
+    mat.m[1][0] = v.x;  mat.m[1][1] = v.y;  mat.m[1][2] = v.z;
+    mat.m[2][0] = n.x;  mat.m[2][1] = n.y;  mat.m[2][2] = n.z;
+
+    mat.m[0][3] = -Vec3::Dot(u, camera_pos);
+    mat.m[1][3] = -Vec3::Dot(v, camera_pos);
+    mat.m[2][3] = -Vec3::Dot(n, camera_pos);
+
+    return mat;
+}
+
+/* 
+    near means that clipping window is on near plane
+    maybe implementation should be changed if clipping plane want to be off the near plane
+
+    M_normpers =
+
+    |  -2·n/(x_max-x_min)            0                 (x_max+x_min)/(x_max-x_min)             0    |
+    |       0              -2·near/(y_max-y_min)     (y_max + y_min)/(y_max-y_min)             0    |
+    |       0                        0                         (n+f)/(n-f)          (-2·n·f)/(n-f)  |
+    |       0                        0                             -1                          0    |
+
+*/
+Mat4x4 Mat4x4::PerspectiveOffCenter( float x_near_min, float x_near_max,
+                                     float y_near_min, float y_near_max,
+                                     float z_near,     float z_far )
+{
+    Mat4x4 mat;
+
+    float inverse_x_max_minus_x_min  = 1.0f / (x_near_max - x_near_min);
+    float inverse_y_max_minus_y_min  = 1.0f / (y_near_max - y_near_min);
+    float inverse_z_near_minus_z_far = 1.0f / (z_near     - z_far);
+
+    mat.m[0][0] = -2.0f * z_near * inverse_x_max_minus_x_min;
+    mat.m[0][2] = (x_near_max + x_near_min) * inverse_x_max_minus_x_min;
+
+    mat.m[1][1] = -2.0f * z_near * inverse_y_max_minus_y_min;
+    mat.m[1][2] = (y_near_max + y_near_min) * inverse_y_max_minus_y_min;
+
+    mat.m[2][2] = (z_far + z_near) * inverse_z_near_minus_z_far;
+    mat.m[2][3] = (-2.0f * z_near * z_far) * inverse_z_near_minus_z_far;
+
+    mat.m[3][2] = -1.0f;
+
+    return mat;
+}
