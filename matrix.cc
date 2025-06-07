@@ -321,10 +321,12 @@ Mat4x4 Mat4x4::PerspectiveOffCenter( float x_near_min, float x_near_max,
 }
 
 /*
- M_viewport = |  (x_max - x_min)/2          0             0      (x_max + x_min)/2  |
-              |         0           (y_max - y_min)/2     0      (y_max + y_min)/2  |
-              |         0                   0            1/2             1/2        | 
-              |         0                   0             0               1         |
+    M_viewport = 
+
+    |  (x_max - x_min)/2          0             0      (x_max + x_min)/2  |
+    |         0           (y_max - y_min)/2     0      (y_max + y_min)/2  |
+    |         0                   0            1/2             1/2        | 
+    |         0                   0             0               1         |
 */
 
 Mat4x4 Mat4x4::ViewportTransformation( float x_view_min, float x_view_max, 

@@ -2,6 +2,39 @@
 
 #include <cmath>
 
+class Vec2
+{
+public:
+    float x, y;
+
+    Vec2(float x = 0, float y = 0);
+
+    Vec2 operator+(const Vec2& other) const;
+    Vec2& operator+=(const Vec2& other);
+
+    Vec2 operator-(const Vec2& other) const;
+    Vec2& operator-=(const Vec2& other);
+
+    Vec2 operator*(float scalar) const;
+    Vec2& operator*=(float scalar);
+
+    Vec2 operator/(float scalar) const;
+    Vec2& operator/=(float scalar);
+
+    bool operator==(const Vec2& other) const;
+
+    float Length() const;
+
+    Vec2 Normalize() const;
+
+    static float Dot(const Vec2& a, const Vec2& b);
+
+    static float Cross(const Vec2& a, const Vec2& b);
+
+    static Vec2 Normalize(const Vec2& a);
+};
+
+
 class Vec3
 {
 public:
@@ -25,7 +58,7 @@ public:
 
     float Length() const;
 
-    Vec3 Normalize();
+    Vec3 Normalize() const;
 
     static float Dot(const Vec3& a, const Vec3& b);
 
@@ -57,7 +90,7 @@ public:
 
     float Length() const;
 
-    Vec4 Normalize();
+    Vec4 Normalize() const;
 
     static float Dot(const Vec4& a, const Vec4& b);
 
