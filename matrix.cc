@@ -260,10 +260,10 @@ Mat4x4 Mat4x4::Perspective(float fov, float aspect, float near, float far)
 
     5. u v n coordinate completed
 
-    |  Ux  Uy  Uz  -dot(U, eye) |
-    |  Vx  Vy  Vz  -dot(V, eye) |
-    |  Nx  Ny  Nz  -dot(N, eye) |
-    |   0   0   0      1        |
+    |  Ux  Uy  Uz  -dot(U, camera_pos) |
+    |  Vx  Vy  Vz  -dot(V, camera_pos) |
+    |  Nx  Ny  Nz  -dot(N, camera_pos) |
+    |   0   0   0      1               |
 */
 Mat4x4 Mat4x4::LookAt(const Vec3& camera_pos, const Vec3& look_at_pos, const Vec3& up)
 {
@@ -286,7 +286,7 @@ Mat4x4 Mat4x4::LookAt(const Vec3& camera_pos, const Vec3& look_at_pos, const Vec
 
 /* 
     near means that clipping window is on near plane
-    maybe implementation should be changed if clipping plane want to be off the near plane
+    implementation should be changed if wanting the clipping window be off the near plane
 
     M_normpers =
 
@@ -316,6 +316,29 @@ Mat4x4 Mat4x4::PerspectiveOffCenter( float x_near_min, float x_near_max,
     mat.m[2][3] = (-2.0f * z_near * z_far) * inverse_z_near_minus_z_far;
 
     mat.m[3][2] = -1.0f;
+
+    return mat;
+}
+
+/*
+ M_viewport = |  (x_max - x_min)/2          0             0      (x_max + x_min)/2  |
+              |         0           (y_max - y_min)/2     0      (y_max + y_min)/2  |
+              |         0                   0            1/2             1/2        | 
+              |         0                   0             0               1         |
+*/
+
+Mat4x4 Mat4x4::ViewportTransformation( float x_view_min, float x_view_max, 
+                                       float y_view_min, float y_view_max )
+{
+    Mat4x4 mat;
+
+    mat.m[0][0] = (x_view_max - x_view_min) * 0.5f;
+    mat.m[0][3] = (x_view_max + x_view_min) * 0.5f;
+    mat.m[1][1] = (y_view_max - y_view_min) * 0.5f;
+    mat.m[1][3] = (y_view_max + y_view_min) * 0.5f;
+    mat.m[2][2] = 0.5f;
+    mat.m[2][3] = 0.5f;
+    mat.m[3][3] = 1.0f;
 
     return mat;
 }
