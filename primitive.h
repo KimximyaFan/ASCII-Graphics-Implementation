@@ -26,7 +26,8 @@ struct Transform
     인간 입장에서는 난해하지만
     gpu programming을 염두해둔다면 이런 설계가 효율적이다다
 */
-class Mesh {
+class Mesh 
+{
 public:
     std::vector<Vertex>    vertices;
     std::vector<uint32_t>  indices;

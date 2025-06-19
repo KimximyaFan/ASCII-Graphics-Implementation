@@ -1,0 +1,12 @@
+##
+clipper.cc clipmesh 함수 최적화 (나중에)
+
+
+
+1. visible surface detection ( z-buffer )
+
+2. illumination model
+
+3. cartoon rendering
+
+4. culling
