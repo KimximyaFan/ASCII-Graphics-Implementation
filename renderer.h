@@ -15,9 +15,9 @@ public:
     // mvp : Model View Projection
     void DrawMesh (const Mesh& mesh, Mat4x4 mvp);
 
-    const std::vector<Color>& GetFrameBuffer() const;
+    const std::vector<Color>& GetFrameBuffer () const;
 
-    const std::vector<float>& GetZBuffer() const;
+    const std::vector<float>& GetZBuffer () const;
 
 private:
     int width, height;
