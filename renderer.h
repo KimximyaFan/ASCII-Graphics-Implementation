@@ -5,8 +5,6 @@
 #include "matrix.h"
 #include "color.h"
 
-
-
 class Renderer
 {
 public:
@@ -17,9 +15,9 @@ public:
     // mvp : Model View Projection
     void DrawMesh (const Mesh& mesh, Mat4x4 mvp);
 
-    const std::vector<Color>& const GetFrameBuffer ();
+    const std::vector<Color>& GetFrameBuffer() const;
 
-    const std::vector<float>& const GetZBuffer ();
+    const std::vector<float>& GetZBuffer() const;
 
 private:
     int width, height;
