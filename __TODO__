@@ -4,6 +4,9 @@ Renderer.cc 완성하기
 #
 clipper.cc 파일의 clipmesh 함수 최적화 (나중에)
 
+#
+renderer.cc 파일의 drawmesh 최적화 가능
+(deep copy 부분 capacity 재사용, reserve and 직접복사, std::transform, gpu programming )
 
 
 1. visible surface detection ( z-buffer )

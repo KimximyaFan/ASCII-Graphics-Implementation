@@ -4,10 +4,14 @@
 #include "primitive.h"
 #include "matrix.h"
 #include "color.h"
+#include "projected_vertex.h"
 
 class Renderer
 {
 public:
+    static const Color clear_color;
+    static const float clear_depth;
+
     Renderer (int width, int height);
 
     void ClearBuffers ();
@@ -21,14 +25,9 @@ public:
 
 private:
     int width, height;
+    Mat4x4 viewport_matrix;
     std::vector<Color> frame_buffer;
     std::vector<float> z_buffer;
-
-    struct Projected_Vertex
-    {
-        float x, y, z;
-        Color c;
-    };
 
     void RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vertex& v2);
 
