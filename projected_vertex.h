@@ -5,5 +5,5 @@
 struct Projected_Vertex
 {
     float x, y, z;
-    Color c;
+    Color color;
 };

@@ -29,7 +29,9 @@ private:
     std::vector<Color> frame_buffer;
     std::vector<float> z_buffer;
 
-    void RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vertex& v2);
-
     Projected_Vertex ProjectVertex (const Vertex& v);
+
+    inline float GetTriangleSpace (const Projected_Vertex& A, const Projected_Vertex& B, const Projected_Vertex& C);
+
+    void RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vertex& v2);
 };

@@ -2,6 +2,7 @@
 
 #include "renderer.h"
 #include "matrix.h"
+#include <algorithm>
 
 const Color Renderer::clear_color = {0, 0, 0, 0};
 const float Renderer::clear_depth = 1.0f;
@@ -53,18 +54,76 @@ Projected_Vertex Renderer::ProjectVertex (const Vertex& v)
     // 배열의 y축은 위에서 아래로 가기때문에, y를 뒤집어줘야함, height - y 
     out.y = (1.0f - (ndcY*0.5f + 0.5f)) * height;
     out.z = ndcZ*0.5f + 0.5f;
-    out.c = { v.color.x, v.color.y, v.color.z, v.color.w };
+    out.color = { v.color.x, v.color.y, v.color.z, v.color.w };
 
     return out;
 }
 
+inline float Renderer::GetTriangleSpace (const Projected_Vertex& A,
+                                        const Projected_Vertex& B,
+                                        const Projected_Vertex& C)
+{
+    return (B.x-A.x)*(C.y-A.y) - (B.y-A.y)*(C.x-A.x);
+}
+
+/*
+    Barycentric Interpolation
+    
+    easy to implement
+
+    if all weights are positive, current point is in triangle
+
+    z interpolation is same with z from A,B,C plane equation (proved)
+*/
 void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vertex& v2)
 {
-    Projected_Vertex pv0 = ProjectVertex(v0);
-    Projected_Vertex pv1 = ProjectVertex(v1);
-    Projected_Vertex pv2 = ProjectVertex(v2);
+    Projected_Vertex A = ProjectVertex(v0);
+    Projected_Vertex B = ProjectVertex(v1);
+    Projected_Vertex C = ProjectVertex(v2);
+    Projected_Vertex P;
 
-    
+    int x_min = std::max(0, (int)std::floor(std::min({A.x, B.x, C.x})));
+    int x_max = std::min(width-1, (int)std::ceil(std::max({A.x, B.x, C.x})));
+    int y_min = std::max(0, (int)std::floor(std::min({A.y, B.y, C.y})));
+    int y_max = std::min(height-1, (int)std::ceil(std::max({A.y, B.y, C.y})));
+
+    float area = GetTriangleSpace(A, B, C);
+
+    if (fabs(area) < 1e-6f) return;
+
+    float inv_area = 1.0f/area;
+
+    for (int y=y_min; y<=y_max; ++y)
+    {
+        for (int x=x_min; x<=x_max; ++x)
+        {
+            P.x = x+0.5f;
+            P.y = y+0.5f;
+
+            float w0 = GetTriangleSpace(A, B, P) * inv_area;
+            float w1 = GetTriangleSpace(B, C, P) * inv_area;
+            float w2 = GetTriangleSpace(C, A, P) * inv_area;
+
+            if ( w0 < 0 || w1 < 0 || w2 < 0)
+                continue;
+
+            float z = 1.0f / (w0/A.z + w1/B.z + w2/C.z);
+
+            int index = y*width + x;
+
+            if ( z < z_buffer[index] )
+            {
+                z_buffer[index] = z;
+
+                Color col;
+                col.r = ((w0/A.z)*A.color.r + (w1/B.z)*B.color.r + (w2/C.z)*C.color.r) * z;
+                col.g = ((w0/A.z)*A.color.g + (w1/B.z)*B.color.g + (w2/C.z)*C.color.g) * z;
+                col.b = ((w0/A.z)*A.color.b + (w1/B.z)*B.color.b + (w2/C.z)*C.color.b) * z;
+                col.a = ((w0/A.z)*A.color.a + (w1/B.z)*B.color.a + (w2/C.z)*C.color.a) * z;
+                frame_buffer[index] = col;
+            }
+        }
+    }
 }
 
 void Renderer::DrawMesh (const Mesh& mesh, Mat4x4 mvp)
