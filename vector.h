@@ -48,6 +48,8 @@ public:
     Vec3 operator-(const Vec3& other) const;
     Vec3& operator-=(const Vec3& other);
 
+    Vec3 operator-() const;
+
     Vec3 operator*(float scalar) const;
     Vec3& operator*=(float scalar);
 
@@ -65,6 +67,8 @@ public:
     static Vec3 Cross(const Vec3& a, const Vec3& b);
 
     static Vec3 Normalize(const Vec3& a);
+
+    static float Length(const Vec3& a);
 };
 
 class Vec4

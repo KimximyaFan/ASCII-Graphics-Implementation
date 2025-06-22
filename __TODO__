@@ -1,23 +1,23 @@
-#
-에딧 의뢰 해야함!
-
-#
-Renderer.cc 완성하기
-
-#
-clipper.cc 파일의 clipmesh 함수 최적화 (나중에)
-
-#
-renderer.cc 파일의 drawmesh 최적화 가능
-(deep copy 부분 capacity 재사용, reserve and 직접복사, std::transform, gpu programming )
+##
+blinn phong model 구현하기
 
 
-1. visible surface detection ( z-buffer )
+illumination model 구현
 
-2. illumination model
+
 
 3. cartoon rendering
 
 4. culling
 
 5. 여유되면 삼각형 그리는 방법 바라센트릭 vs 스캔라인 비교해서 analysis
+
+
+@@
+clipper.cc 파일의 clipmesh 함수 최적화 (나중에)
+
+@@
+renderer.cc 파일의 drawmesh 최적화 가능
+(deep copy 부분 capacity 재사용, reserve and 직접복사, std::transform, gpu programming )
+
+

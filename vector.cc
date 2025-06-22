@@ -109,6 +109,11 @@ Vec3& Vec3::operator-=(const Vec3& other)
     return *this;
 }
 
+Vec3 Vec3::operator-() const
+{
+    return Vec3(-x, -y, -z);
+}
+
 Vec3 Vec3::operator*(float scalar) const
 {
     return Vec3(x * scalar, y * scalar, z * scalar);
@@ -165,6 +170,11 @@ Vec3 Vec3::Normalize(const Vec3& a)
 {
     float len = a.Length();
     return len != 0 ? a / len : Vec3(0, 0, 0);
+}
+
+float Vec3::Length(const Vec3& a)
+{
+    return std::sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
 }
 
 // =====================
