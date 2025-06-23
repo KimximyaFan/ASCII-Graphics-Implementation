@@ -19,7 +19,7 @@ public:
 
     Vec3 GetDirection(const Vec3& P) const override
     {
-        return Vec3::Normalize(position - P);
+        return position - P;
     }
 
     float GetIntensity(const Vec3& P) const override

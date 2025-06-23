@@ -8,8 +8,8 @@ public:
     Vec3 direction;
     float intensity;
 
-    Directional_Light (const Vec3& dir, const float i)
-        : direction(Vec3::Normalize(dir)), intensity(i) {}
+    Directional_Light (const Vec3& dir, const float intensity)
+        : direction(Vec3::Normalize(dir)), intensity(intensity) {}
 
     Light_Type GetType () const override
     {
