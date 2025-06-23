@@ -1,17 +1,30 @@
-##
-blinn phong model 구현하기
 
+@@
+렌더러에서 illumination 연동 어케 할건지
 
-illumination model 구현
+@@
+폴더정리
 
+@@
+Color 어떻게 할건지
 
+@@
+Renderer에서 칼라 값에 따른 if 분기 char 만들기 (cartoon rendering)
 
-3. cartoon rendering
+@@
+main 함수 만들기
 
-4. culling
+@@
+AABB culling
 
-5. 여유되면 삼각형 그리는 방법 바라센트릭 vs 스캔라인 비교해서 analysis
+@@
+여유되면 삼각형 그리는 방법 바라센트릭 vs 스캔라인 비교해서 analysis
 
+@@
+Get Scene Light 구현 문제 (해당 씬의 빛을 어떻게 가져올건지)
+
+@@
+ambient 구현 문제 (현재는 intensity에 계수 곱해서 쓰고 있음, 해당 씬의 gloabl ambient를 어떻게 구현할건지)
 
 @@
 clipper.cc 파일의 clipmesh 함수 최적화 (나중에)
