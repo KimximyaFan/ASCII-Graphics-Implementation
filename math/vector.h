@@ -42,6 +42,8 @@ public:
 
     Vec3(float x = 0, float y = 0, float z = 0);
 
+    Vec3& operator=(const Vec3& );
+
     Vec3 operator+(const Vec3& other) const;
     Vec3& operator+=(const Vec3& other);
 

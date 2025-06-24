@@ -1,9 +1,10 @@
+entity, light manager, scene 구현
+
+
+
 
 @@
 렌더러에서 illumination 연동 어케 할건지
-
-@@
-폴더정리
 
 @@
 Color 어떻게 할건지
