@@ -43,26 +43,3 @@ private:
     */
 };
 
-
-
-class Object 
-{
-public:
-    std::vector<Mesh> parts;
-    Transform   transform;
-
-    //Material    material;
-    
-    /*
-    void draw(Renderer& r) const {
-        // 오브젝트 전체 트랜스폼 설정
-        r.setTransform(transform.toMatrix());
-
-        // 각 서브메시를 순회하며 그리기
-        for (auto& part : parts) {
-            r.setMaterial(part.material);
-            part.mesh->draw(r);
-        }
-    }
-        */
-};
