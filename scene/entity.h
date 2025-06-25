@@ -20,4 +20,5 @@ public:
         }
     }
         */
+    void Update(float delta) {};
 };

@@ -1,7 +1,10 @@
-entity, light manager, scene 구현
+
+color 정의, 렌더러에서 일루미네이션 연동, AABB 컬링만들기, 렌더러 컬러에 따른 if분기
+씬에서 렌더러 렌더 구현
 
 
-
+@@
+각종 함수 오버헤드나 불필요한 복사 있는지 점검
 
 @@
 렌더러에서 illumination 연동 어케 할건지
@@ -21,8 +24,6 @@ AABB culling
 @@
 여유되면 삼각형 그리는 방법 바라센트릭 vs 스캔라인 비교해서 analysis
 
-@@
-Get Scene Light 구현 문제 (해당 씬의 빛을 어떻게 가져올건지)
 
 @@
 ambient 구현 문제 (현재는 intensity에 계수 곱해서 쓰고 있음, 해당 씬의 gloabl ambient를 어떻게 구현할건지)

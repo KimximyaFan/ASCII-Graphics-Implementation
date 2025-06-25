@@ -20,6 +20,11 @@ public:
 
     virtual float GetIntensity(const Vec3& P) const = 0;
 
+    int GetId() const { return id; }
 protected:
-    Light() = default;
+    Light() : id(next_id++) {}
+
+private:
+    int id;
+    static inline int next_id = 0;
 };

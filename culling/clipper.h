@@ -40,5 +40,5 @@ private:
 
     static Vertex GetIntersectVertex(const Vec4& plane, const Vertex& a, const Vertex& b);
 
-    std::vector<Vertex> SutherlandHodgman(std::vector<Vertex> poly, Vec4& plane);
+    std::vector<Vertex> SutherlandHodgman(const std::vector<Vertex>& poly, const Vec4& plane);
 };

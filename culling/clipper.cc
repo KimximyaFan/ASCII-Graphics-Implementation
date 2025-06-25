@@ -116,7 +116,7 @@ Vertex Clipper::GetIntersectVertex(const Vec4& plane, const Vertex& a, const Ver
     return result;
 }
 
-std::vector<Vertex> Clipper::SutherlandHodgman(std::vector<Vertex> input, Vec4& plane)
+std::vector<Vertex> Clipper::SutherlandHodgman(const std::vector<Vertex>& input, const Vec4& plane)
 {
     std::vector<Vertex> output;
 
