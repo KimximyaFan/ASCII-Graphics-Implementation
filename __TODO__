@@ -1,5 +1,11 @@
 
-color 정의, 렌더러에서 일루미네이션 연동, AABB 컬링만들기, 렌더러 컬러에 따른 if분기
+DrawMesh함수 temp h 참고해서 만들기
+(MV 적용, 일루미네이션 적용, projection, 클리핑 적용, 레스터라이즈)
+
+Material 어떻게 할건지? (mesh oriented?)
+
+AABB 컬링만들기 
+렌더러 컬러에 따른 if분기
 씬에서 렌더러 렌더 구현
 
 
