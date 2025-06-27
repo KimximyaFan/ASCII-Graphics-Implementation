@@ -1,10 +1,13 @@
 #pragma once
 
 #include <vector>
+#include <memory> 
 #include "primitive.h"
 #include "matrix.h"
 #include "color.h"
 #include "projected_vertex.h"
+#include "light models/lighting_model.h"
+#include "scene/scene.h"
 
 class Renderer
 {
@@ -16,8 +19,10 @@ public:
 
     void ClearBuffers ();
 
+    void SetLightingModel (std::unique_ptr<Lighting_Model> lighting);
+
     // mvp : Model View Projection
-    void DrawMesh (const Mesh& mesh, Mat4x4 mvp);
+    void DrawMesh (const Mesh& mesh, Mat4x4 M, Mat4x4 V, Mat4x4 P);
 
     const std::vector<Color>& GetFrameBuffer () const;
 
@@ -28,6 +33,8 @@ private:
     Mat4x4 viewport_matrix;
     std::vector<Color> frame_buffer;
     std::vector<float> z_buffer;
+    std::unique_ptr<Lighting_Model> lighting_model;
+    std::unique_ptr<Scene> scene;
 
     Projected_Vertex ProjectVertex (const Vertex& v);
 

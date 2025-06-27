@@ -2,6 +2,7 @@
 
 #include "renderer.h"
 #include "matrix.h"
+#include "culling/clipper.h"
 #include <algorithm>
 
 const Color Renderer::clear_color = {0, 0, 0, 0};
@@ -29,6 +30,11 @@ void Renderer::ClearBuffers ()
     std::fill(z_buffer.begin(), z_buffer.end(), clear_depth);
 }
 
+void Renderer::SetLightingModel(std::unique_ptr<Lighting_Model> lighting)
+{
+    lighting_model = std::move(lighting);
+}
+
 Projected_Vertex Renderer::ProjectVertex (const Vertex& v)
 {
     /*
@@ -54,7 +60,7 @@ Projected_Vertex Renderer::ProjectVertex (const Vertex& v)
     // 배열의 y축은 위에서 아래로 가기때문에, y를 뒤집어줘야함, height - y 
     out.y = (1.0f - (ndcY*0.5f + 0.5f)) * height;
     out.z = ndcZ*0.5f + 0.5f;
-    out.color = { v.color.x, v.color.y, v.color.z, v.color.w };
+    out.color = { v.color.r, v.color.g, v.color.b, v.color.a };
 
     return out;
 }
@@ -126,18 +132,58 @@ void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vert
     }
 }
 
-void Renderer::DrawMesh (const Mesh& mesh, Mat4x4 mvp)
-{
-    // deep copy
-    std::vector<Vertex> transformed_vertices = mesh.vertices;
+/*
 
-    for (auto& v : transformed_vertices)
-        v.position = mvp * v.position;
+조명·컬링·노멀 같은 “뷰 공간 로직”은 MV를, 
+클립·래스터 같은 “투영 이후 로직”은 MVP를 씁니다. 
+필요한 처리에 따라 둘 다 갖고 있는 게 가장 유연
+
+M = local to world
+V = world to camera
+P = camera to projection 
+*/
+
+void Renderer::DrawMesh (const Mesh& mesh, Mat4x4 M, Mat4x4 V, Mat4x4 P)
+{
+    Mat4x4 MV = V * M;
+    Mat4x4 MVP = P * MV;
+    Mesh out_mesh = mesh;
+
+    /*
+        Illumination
+    */
+    for (size_t i=0; i<out_mesh.vertices.size(); ++i)
+    {
+        float intensity = lighting_model->Shade(
+            out_mesh.vertices[i].position.ToVec3(),
+            out_mesh.vertices[i].normal,
+            scene->GetCamera()->GetPosition() - out_mesh.vertices[i].position.ToVec3(),
+            *mesh.material,
+            scene->GetLightManager()->GetLights()
+        );
+
+        out_mesh.vertices[i].color.r *= intensity;
+        out_mesh.vertices[i].color.g *= intensity;
+        out_mesh.vertices[i].color.b *= intensity;
+    }
+
+    /*
+        Projection
+    */
+    for (auto& v : out_mesh.vertices)
+        v.position = MVP * v.position;
+
+    /*
+        Clipping
+    */
+
+    Clipper clipper(P);
+    Mesh transformed_mesh = clipper.ClipMesh(out_mesh);
 
     for (size_t i=0; i+2<mesh.indices.size(); i+=3) 
     {
-        RasterizeTriangle(transformed_vertices[mesh.indices[i+0]], 
-                          transformed_vertices[mesh.indices[i+1]], 
-                          transformed_vertices[mesh.indices[i+2]]);
+        RasterizeTriangle(transformed_mesh.vertices[mesh.indices[i+0]], 
+                          transformed_mesh.vertices[mesh.indices[i+1]], 
+                          transformed_mesh.vertices[mesh.indices[i+2]]);
     }
 }

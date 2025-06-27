@@ -3,13 +3,15 @@
 #include "vector.h"
 #include <vector>
 #include <cstdint>
+#include <memory>
+#include "material.h"
 
 struct Vertex 
 {
     Vec4 position;
     Vec3 normal;
     Vec2 uv;
-    Vec4 color;
+    Color color;
 };
 
 struct Transform 
@@ -31,7 +33,7 @@ class Mesh
 public:
     std::vector<Vertex>    vertices;
     std::vector<uint32_t>  indices;
-
+    std::shared_ptr<Material> material;
     /*
     void uploadToGPU();
     void releaseGPU();

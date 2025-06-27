@@ -98,6 +98,8 @@ public:
 
     Vec4 Normalize() const;
 
+    Vec3 ToVec3() const;
+
     static float Dot(const Vec4& a, const Vec4& b);
 
     static Vec4 Normalize(const Vec4& a);

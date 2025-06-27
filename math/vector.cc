@@ -264,3 +264,8 @@ Vec4 Vec4::Normalize(const Vec4& a)
     float len = a.Length();
     return len == 0 ? Vec4(0, 0, 0, 0) : a / len;
 }
+
+Vec3 Vec4::ToVec3() const
+{
+    return Vec3(x, y, z);
+}

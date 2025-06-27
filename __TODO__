@@ -1,13 +1,15 @@
+DrawMesh()
+: MC to WC 구현
+MVP 곱하던거 수정, M 곱하고, V곱하고 P 곱하고 등등
+clipper 검증, gpt는 MV만 하고, clipper에 P 넣고 클리핑후
+P 곱하라는데 이유를 모르겟음 분석 ㄱ
 
-DrawMesh함수 temp h 참고해서 만들기
-(MV 적용, 일루미네이션 적용, projection, 클리핑 적용, 레스터라이즈)
 
-Material 어떻게 할건지? (mesh oriented?)
-
+Clipper 함수 원근 보간 구현
 AABB 컬링만들기 
 렌더러 컬러에 따른 if분기
 씬에서 렌더러 렌더 구현
-
+Entity vertex normal preprocess 구현
 
 @@
 각종 함수 오버헤드나 불필요한 복사 있는지 점검
@@ -41,4 +43,9 @@ clipper.cc 파일의 clipmesh 함수 최적화 (나중에)
 renderer.cc 파일의 drawmesh 최적화 가능
 (deep copy 부분 capacity 재사용, reserve and 직접복사, std::transform, gpu programming )
 
+
+깊은 복사(deep copy)의 비용
+매 Draw 호출마다 Mesh out_mesh = mesh; 로 벡터 데이터를 전부 복사하면,
+
+버텍스·인덱스 수가 많을수록 심각한 성능 저하를 유발합니다.
 
