@@ -1,5 +1,61 @@
 #include "matrix.h"
 
+/*
+    3x3 Matrix
+*/
+
+Vec3 Mat3x3::operator*(const Vec3& other) const
+{
+    return Vec3(
+        m[0][0] * other.x + m[0][1] * other.y + m[0][2] * other.z,
+        m[1][0] * other.x + m[1][1] * other.y + m[1][2] * other.z,
+        m[2][0] * other.x + m[2][1] * other.y + m[2][2] * other.z
+    );
+}
+
+Mat3x3& Mat3x3::InverseTranspose()
+{
+    float a00 = m[0][0], a01 = m[0][1], a02 = m[0][2];
+    float a10 = m[1][0], a11 = m[1][1], a12 = m[1][2];
+    float a20 = m[2][0], a21 = m[2][1], a22 = m[2][2];
+
+    float det = a00*(a11*a22 - a12*a21)
+                -a01*(a10*a22 - a12*a20)
+                +a02*(a10*a21 - a11*a20);
+
+    if (std::fabs(det) < 1e-6f)
+    {
+        m[0][0]=1; m[0][1]=0; m[0][2]=0;
+        m[1][0]=0; m[1][1]=1; m[1][2]=0;
+        m[2][0]=0; m[2][1]=0; m[2][2]=1;
+        return *this;
+    }
+
+    float invDet = 1.0f / det;
+
+    float c00 =  (a11*a22 - a12*a21) * invDet;
+    float c01 = -(a10*a22 - a12*a20) * invDet;
+    float c02 =  (a10*a21 - a11*a20) * invDet;
+
+    float c10 = -(a01*a22 - a02*a21) * invDet;
+    float c11 =  (a00*a22 - a02*a20) * invDet;
+    float c12 = -(a00*a21 - a01*a20) * invDet;
+
+    float c20 =  (a01*a12 - a02*a11) * invDet;
+    float c21 = -(a00*a12 - a02*a10) * invDet;
+    float c22 =  (a00*a11 - a01*a10) * invDet;
+
+    m[0][0]=c00; m[0][1]=c01; m[0][2]=c02;
+    m[1][0]=c10; m[1][1]=c11; m[1][2]=c12;
+    m[2][0]=c20; m[2][1]=c21; m[2][2]=c22;
+
+    return *this;
+}
+
+/*
+    4x4 Matrix
+*/
+
 Mat4x4::Mat4x4() {}
 
 Mat4x4::Mat4x4(float value) 
@@ -343,4 +399,16 @@ Mat4x4 Mat4x4::ViewportTransformation( float x_view_min, float x_view_max,
     mat.m[3][3] = 1.0f;
 
     return mat;
+}
+
+
+Mat3x3 Mat4x4::TopLeft3x3() const
+{
+    Mat3x3 result;
+
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            result.m[i][j] = m[i][j];
+
+    return result;
 }

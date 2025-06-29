@@ -1,11 +1,4 @@
-DrawMesh()
-: MC to WC 구현
-MVP 곱하던거 수정, M 곱하고, V곱하고 P 곱하고 등등
-clipper 검증, gpt는 MV만 하고, clipper에 P 넣고 클리핑후
-P 곱하라는데 이유를 모르겟음 분석 ㄱ
 
-
-Clipper 함수 원근 보간 구현
 AABB 컬링만들기 
 렌더러 컬러에 따른 if분기
 씬에서 렌더러 렌더 구현
@@ -13,6 +6,9 @@ Entity vertex normal preprocess 구현
 
 @@
 각종 함수 오버헤드나 불필요한 복사 있는지 점검
+
+@@
+Clipper::GetIntersectVertex() 의 color 보간 문제 연구
 
 @@
 렌더러에서 illumination 연동 어케 할건지
@@ -27,11 +23,7 @@ Renderer에서 칼라 값에 따른 if 분기 char 만들기 (cartoon rendering)
 main 함수 만들기
 
 @@
-AABB culling
-
-@@
 여유되면 삼각형 그리는 방법 바라센트릭 vs 스캔라인 비교해서 analysis
-
 
 @@
 ambient 구현 문제 (현재는 intensity에 계수 곱해서 쓰고 있음, 해당 씬의 gloabl ambient를 어떻게 구현할건지)

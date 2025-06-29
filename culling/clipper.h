@@ -28,7 +28,7 @@ class Clipper
 public:
     Clipper (const Mat4x4& perspective_mat);
 
-    Mesh ClipMesh(const Mesh& mesh);
+    Mesh ClipMesh(const Mesh& mesh) const;
 
 private:
     Mat4x4 proj_view;
@@ -40,5 +40,5 @@ private:
 
     static Vertex GetIntersectVertex(const Vec4& plane, const Vertex& a, const Vertex& b);
 
-    std::vector<Vertex> SutherlandHodgman(const std::vector<Vertex>& poly, const Vec4& plane);
+    static std::vector<Vertex> SutherlandHodgman(const std::vector<Vertex>& poly, const Vec4& plane);
 };

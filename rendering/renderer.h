@@ -8,6 +8,7 @@
 #include "projected_vertex.h"
 #include "light models/lighting_model.h"
 #include "scene/scene.h"
+#include "culling/clipper.h"
 
 class Renderer
 {
@@ -22,7 +23,7 @@ public:
     void SetLightingModel (std::unique_ptr<Lighting_Model> lighting);
 
     // mvp : Model View Projection
-    void DrawMesh (const Mesh& mesh, Mat4x4 M, Mat4x4 V, Mat4x4 P);
+    void DrawMesh (const Mesh& mesh, const Clipper& clipper, Mat4x4 M, Mat4x4 V, Mat4x4 P);
 
     const std::vector<Color>& GetFrameBuffer () const;
 

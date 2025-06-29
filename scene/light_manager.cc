@@ -38,7 +38,7 @@ const std::vector<std::shared_ptr<Light>>& Light_Manager::GetLights() const
     return lights;
 }
 
-void UpdateLights(float delta_time)
+void Light_Manager::UpdateLights(float delta_time)
 {
     /*
     임시

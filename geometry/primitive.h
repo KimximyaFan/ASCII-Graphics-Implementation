@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include "material.h"
+#include "color.h"
 
 struct Vertex 
 {

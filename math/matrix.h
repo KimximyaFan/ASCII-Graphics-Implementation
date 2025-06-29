@@ -2,6 +2,18 @@
 
 #include "vector.h"
 
+class Mat3x3
+{
+public:
+    float m[3][3] = {};
+
+    Mat3x3 () {}
+
+    Vec3 operator*(const Vec3& other) const;
+
+    Mat3x3& InverseTranspose();
+};
+
 class Mat4x4
 {
 public:
@@ -42,4 +54,6 @@ public:
     static Mat4x4 LookAt(const Vec3& camera_pos, const Vec3& look_at_pos, const Vec3& up_vec);
     static Mat4x4 PerspectiveOffCenter(float x_min, float x_max, float y_min, float y_max, float z_near, float z_far);
     static Mat4x4 ViewportTransformation( float x_view_min, float x_view_max, float y_view_min, float y_view_max );
+
+    Mat3x3 TopLeft3x3() const;
 };
