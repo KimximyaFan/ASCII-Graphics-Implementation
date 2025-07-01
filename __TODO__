@@ -1,20 +1,19 @@
 
+로컬 AABB 계산 ( mesh 레벨, entity 레벨 )
+M 행렬로 world AABB 구하는 거 구현
+AABB 자료형 구현 및 mesh 와 entity 에서 local aabb 구하는거 구현
 AABB 컬링만들기 
+Entity의 캡슐화 고려, GetMeshes 구현, shared ptr 고려 위치는 Renderer::Render()
 렌더러 컬러에 따른 if분기
 씬에서 렌더러 렌더 구현
 Entity vertex normal preprocess 구현
+Draw Mesh 코드 변경, 버텍스에 PV 적용하면 안됨
+
+@@
+MC to WC 행렬 구현
 
 @@
 각종 함수 오버헤드나 불필요한 복사 있는지 점검
-
-@@
-Clipper::GetIntersectVertex() 의 color 보간 문제 연구
-
-@@
-렌더러에서 illumination 연동 어케 할건지
-
-@@
-Color 어떻게 할건지
 
 @@
 Renderer에서 칼라 값에 따른 if 분기 char 만들기 (cartoon rendering)

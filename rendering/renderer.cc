@@ -3,6 +3,7 @@
 #include "renderer.h"
 #include "matrix.h"
 #include "culling/clipper.h"
+#include "culling/frustum.h"
 #include <algorithm>
 
 const Color Renderer::clear_color = {0, 0, 0, 0};
@@ -188,5 +189,35 @@ void Renderer::DrawMesh (const Mesh& mesh, const Clipper& clipper, Mat4x4 M, Mat
         RasterizeTriangle(transformed_mesh.vertices[transformed_mesh.indices[i+0]], 
                           transformed_mesh.vertices[transformed_mesh.indices[i+1]], 
                           transformed_mesh.vertices[transformed_mesh.indices[i+2]]);
+    }
+}
+
+void Renderer::Render(const Scene& scene)
+{
+    std::vector<std::shared_ptr<Entity>> visible;
+    std::shared_ptr<Camera> camera = scene.GetCamera();
+
+    Mat4x4 M;
+    Mat4x4 V = camera->GetViewMatrix();
+    Mat4x4 P = camera->GetProjMatrix();
+
+    Frustum frustum;
+    frustum.ExtractFrustumPlanes(V*P);
+
+    Clipper clipper;
+    clipper.SetFrustumPlanes(frustum.GetFrustumPlanes());
+
+    for ( auto e : scene.GetEntities() )
+    {
+        // AABB Culling
+    }
+
+    for ( auto e : visible )
+    {
+        // Draw Mesh
+        for ( auto& mesh : e->GetMeshes() )
+        {
+            DrawMesh(mesh, clipper, M, V, P);
+        }
     }
 }

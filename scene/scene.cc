@@ -34,7 +34,7 @@ const std::vector<std::shared_ptr<Entity>>& Scene::GetEntities() const
     return entities;
 }
 
-Light_Manager& Scene::GetLightManager()
+const std::shared_ptr<Light_Manager>& Scene::GetLightManager()
 {
     return light_manager;
 }
@@ -54,21 +54,5 @@ void Scene::Update(float delta_time)
     for (auto& entity : entities)
         entity->Update(delta_time);
 
-    light_manager.UpdateLights(delta_time);
-}
-
-void Render(Renderer& renderer)
-{
-    /*
-        if (camera_) {
-            renderer.SetViewProjection(camera_->GetViewMatrix(), camera_->GetProjectionMatrix());
-        }
-        // 조명 정보 세팅
-        renderer.SetLights(lightManager_.GetLights());
-        // 엔티티 드로우
-        for (auto& entity : entities_) {
-            entity->Draw(renderer);
-        }
-    
-    */
+    light_manager->UpdateLights(delta_time);
 }

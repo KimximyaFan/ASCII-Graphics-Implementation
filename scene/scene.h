@@ -25,7 +25,6 @@ public:
     void SetCamera(const std::shared_ptr<Camera>& camera);
     const std::shared_ptr<Camera>& GetCamera() const;
     void Update(float delta_time);
-    void Render(Renderer& renderer);
 
 private:
     std::vector<std::shared_ptr<Entity>> entities;

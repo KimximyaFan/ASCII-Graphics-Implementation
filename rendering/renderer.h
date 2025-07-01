@@ -29,6 +29,8 @@ public:
 
     const std::vector<float>& GetZBuffer () const;
 
+    void Render(const Scene& scene);
+
 private:
     int width, height;
     Mat4x4 viewport_matrix;

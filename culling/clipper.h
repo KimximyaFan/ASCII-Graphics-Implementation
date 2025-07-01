@@ -26,15 +26,14 @@
 class Clipper 
 {
 public:
-    Clipper (const Mat4x4& perspective_mat);
+    Clipper () {};
+
+    void SetFrustumPlanes(const std::array<Vec4, 6>& planes);
 
     Mesh ClipMesh(const Mesh& mesh) const;
 
 private:
-    Mat4x4 proj_view;
     std::array<Vec4, 6> frustum_planes;
-
-    static std::array<Vec4, 6> ExtractFrustumPlanes(const Mat4x4& projView);
 
     static bool IsVertexInside(const Vertex& vertex, const Vec4& plane);
 
