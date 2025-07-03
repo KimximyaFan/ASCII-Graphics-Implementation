@@ -1,5 +1,5 @@
 
-로컬 AABB 계산 ( mesh 레벨, entity 레벨 )
+Renderer Render() 에서 aabb culling 구현
 M 행렬로 world AABB 구하는 거 구현
 AABB 자료형 구현 및 mesh 와 entity 에서 local aabb 구하는거 구현
 AABB 컬링만들기 
@@ -11,6 +11,10 @@ Draw Mesh 코드 변경, 버텍스에 PV 적용하면 안됨
 
 @@
 MC to WC 행렬 구현
+
+@@
+game 구현시 AABB 쪽 생각하고 개선해보기, 현재는 entity mesh 둘다 local aabb 가지고있고
+이를 M 행렬로 변환해서 가져오는 형태임
 
 @@
 각종 함수 오버헤드나 불필요한 복사 있는지 점검

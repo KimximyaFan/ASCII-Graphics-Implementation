@@ -84,8 +84,11 @@ Vec2 Vec2::Normalize(const Vec2& a)
     return len != 0 ? Vec2(a.x / len, a.y / len) : Vec2(0, 0);
 }
 
+Vec3::Vec3(float a) : x(a), y(a), z(a) {}
 
 Vec3::Vec3(float x, float y, float z) : x(x), y(y), z(z) {}
+
+Vec3::Vec3(const Vec3& other) : x(other.x), y(other.y), z(other.z) {}
 
 Vec3& Vec3::operator=(const Vec3& other)
 {
