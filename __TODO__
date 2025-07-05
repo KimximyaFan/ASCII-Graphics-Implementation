@@ -1,16 +1,10 @@
 
-Renderer Render() 에서 aabb culling 구현
-M 행렬로 world AABB 구하는 거 구현
-AABB 자료형 구현 및 mesh 와 entity 에서 local aabb 구하는거 구현
-AABB 컬링만들기 
 Entity의 캡슐화 고려, GetMeshes 구현, shared ptr 고려 위치는 Renderer::Render()
 렌더러 컬러에 따른 if분기
 씬에서 렌더러 렌더 구현
 Entity vertex normal preprocess 구현
 Draw Mesh 코드 변경, 버텍스에 PV 적용하면 안됨
 
-@@
-MC to WC 행렬 구현
 
 @@
 game 구현시 AABB 쪽 생각하고 개선해보기, 현재는 entity mesh 둘다 local aabb 가지고있고
@@ -44,3 +38,11 @@ renderer.cc 파일의 drawmesh 최적화 가능
 
 버텍스·인덱스 수가 많을수록 심각한 성능 저하를 유발합니다.
 
+@@
+컬링·드로우 루프 병합 (선택)
+순서를 재정렬하거나 추가 정렬이 필요 없으면, 컬링과 즉시 드로우를 한 루프에서 처리해도 됩니다.
+
+@@
+Renderer::Render(),
+MatrixConversion()에서 8개 코너 변환 대신 center/extent 식으로 AABB 변환 (연산 감소함)
+성능비교 테스트

@@ -53,6 +53,7 @@ Vec3 AABB::Extents() const
 
 // 복사비용 존재
 // 매트릭스와 각 코너 변환시 연산 횟수 줄일 수 있음
+/*
 AABB AABB::MatrixConversion(const Mat4x4& M) const
 {
     Vec3 corners[8] = {
@@ -76,8 +77,21 @@ AABB AABB::MatrixConversion(const Mat4x4& M) const
 
     return conversioned;
 }
+*/
+AABB AABB::MatrixConversion(const Mat4x4& M) const
+{
+    Vec3 c = Center();
+    Vec3 e = Extents();
 
-static AABB Union(const AABB& a, const AABB& b)
+    Vec3 wc = (M*Vec4(c.x, c.y, c.z, 1.0f)).ToVec3();
+    Vec3 we = {std::fabs(M.m[0][0])*e.x + std::fabs(M.m[0][1])*e.y + std::fabs(M.m[0][2])*e.z
+              ,std::fabs(M.m[1][0])*e.x + std::fabs(M.m[1][1])*e.y + std::fabs(M.m[1][2])*e.z
+              ,std::fabs(M.m[2][0])*e.x + std::fabs(M.m[2][1])*e.y + std::fabs(M.m[2][2])*e.z};
+    
+    return AABB{ wc - we, wc + we };
+}
+
+AABB AABB::Union(const AABB& a, const AABB& b)
 {
     return AABB(Vec3(std::min(a.min.x, b.min.x),
                      std::min(a.min.y, b.min.y),

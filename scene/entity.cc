@@ -17,3 +17,8 @@ const AABB& Entity::GetLocalAABB()
 {
     return local_aabb;
 }
+
+Mat4x4 Entity::GetLocalToWorldMatrix() const
+{
+    return transform.GetMatrix();
+}

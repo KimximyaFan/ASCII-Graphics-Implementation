@@ -32,6 +32,8 @@ public:
 
     Mesh ClipMesh(const Mesh& mesh) const;
 
+    bool IsAABBVisible(const AABB& box) const;
+
 private:
     std::array<Vec4, 6> frustum_planes;
 

@@ -126,3 +126,18 @@ Mesh Clipper::ClipMesh(const Mesh& mesh) const
 
     return output;
 }
+
+bool Clipper::IsAABBVisible(const AABB& box) const
+{
+    for (const auto& p : frustum_planes)
+    {
+        float dist = p.x * ((p.x >= 0.0f) ? box.max.x : box.min.x)
+                   + p.y * ((p.y >= 0.0f) ? box.max.y : box.min.y)
+                   + p.z * ((p.z >= 0.0f) ? box.max.z : box.min.z)
+                   + p.w;
+                   
+        if ( dist < 0.0f )
+            return false;
+    }
+    return true;
+}

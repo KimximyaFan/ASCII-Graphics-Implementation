@@ -195,9 +195,10 @@ void Renderer::DrawMesh (const Mesh& mesh, const Clipper& clipper, Mat4x4 M, Mat
 void Renderer::Render(const Scene& scene)
 {
     std::vector<std::shared_ptr<Entity>> visible;
+    visible.reserve(scene.GetEntities().size());
+
     std::shared_ptr<Camera> camera = scene.GetCamera();
 
-    Mat4x4 M;
     Mat4x4 V = camera->GetViewMatrix();
     Mat4x4 P = camera->GetProjMatrix();
 
@@ -207,17 +208,19 @@ void Renderer::Render(const Scene& scene)
     Clipper clipper;
     clipper.SetFrustumPlanes(frustum.GetFrustumPlanes());
 
-    for ( auto e : scene.GetEntities() )
+    // AABB Culling
+    for ( auto& e : scene.GetEntities() )
     {
-        // AABB Culling
+        AABB world_aabb = e->GetLocalAABB().MatrixConversion(e->GetLocalToWorldMatrix());
+
+        if ( clipper.IsAABBVisible(world_aabb) == true )
+            visible.push_back(e);
     }
 
-    for ( auto e : visible )
+    for ( auto& e : visible )
     {
         // Draw Mesh
-        for ( auto& mesh : e->GetMeshes() )
-        {
-            DrawMesh(mesh, clipper, M, V, P);
-        }
+        for ( auto& mesh : e->parts )
+            DrawMesh(mesh, clipper, e->GetLocalToWorldMatrix(), V, P);
     }
 }

@@ -1,11 +1,20 @@
 #pragma once
 
-#include "vector.h"
+#include "math/vector.h"
+#include "math/matrix.h"
 
 struct Transform 
 {
-    Vec3 position;
-    Vec3 rotation;
-    Vec3 scale = {1,1,1};
-    //Mat4  toMatrix() const;
+    Vec3 position = { 0, 0, 0 };
+    Vec3 rotation = { 0, 0, 0 };
+    Vec3 scale = { 1, 1, 1 };
+
+    mutable Mat4x4 cached_matrix;
+    mutable bool dirty = true;
+
+    void SetPosition(const Vec3& p);
+    void SetRotation(const Vec3& r);
+    void SetScale(const Vec3& s);
+
+    Mat4x4 GetMatrix() const;
 };
