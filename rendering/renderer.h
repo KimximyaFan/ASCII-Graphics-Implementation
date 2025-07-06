@@ -6,7 +6,7 @@
 #include "matrix.h"
 #include "color.h"
 #include "projected_vertex.h"
-#include "light models/lighting_model.h"
+#include "light_models/lighting_model.h"
 #include "scene/scene.h"
 #include "culling/clipper.h"
 

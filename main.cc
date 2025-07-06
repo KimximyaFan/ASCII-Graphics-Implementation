@@ -1,6 +1,3 @@
-#pragma once
-
-#include "scene/camera.h"
 #include "scene/scene.h"
 #include "scene/camera.h"
 #include "scene/entity.h"
@@ -8,7 +5,9 @@
 #include "math/vector.h"
 #include "light/directional_light.h"
 #include "test.h"
-#include "light models/blinn_phong.h"
+#include "light_models/blinn_phong.h"
+#include "input_handler.h"
+#include "fps_counter/fps_counter.h"
 
 int main(int argc, char* argv[])
 {
@@ -23,8 +22,8 @@ int main(int argc, char* argv[])
     Vec3 camera_up = Vec3(0.0f, 1.0, 0.0f);
     float fov = 60.0f;
     float aspect = width / height;
-    float near = 0.1f;
-    float far = 100.0f;
+    float near_plane = 0.1f;
+    float far_plane = 100.0f;
 
     auto camera_ptr = std::make_shared<Camera>(
         camera_pos,
@@ -32,8 +31,8 @@ int main(int argc, char* argv[])
         camera_up,
         fov,
         aspect,
-        near,
-        far
+        near_plane,
+        far_plane
     );
 
     scene.SetCamera(camera_ptr);
@@ -51,5 +50,14 @@ int main(int argc, char* argv[])
     Renderer renderer(width, height);
     renderer.SetLightingModel(std::make_unique<Blinn_Phong>());
 
-    renderer.Render(scene);
+    Fps_Counter fps_counter;
+    fps_counter.Start();
+
+    while ( Input_Handler::IsSpacePressed() == false )
+    {
+        renderer.Render(scene);
+
+        int fps = fps_counter.Get_Fps();
+    }
+    
 }
