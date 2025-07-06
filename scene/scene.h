@@ -21,7 +21,7 @@ public:
     void RemoveEntity(const std::shared_ptr<Entity>& entity);
     void ClearEntities();
     const std::vector<std::shared_ptr<Entity>>& GetEntities() const;
-    const std::shared_ptr<Light_Manager>& GetLightManager();
+    const std::shared_ptr<Light_Manager>& GetLightManager() const;
     void SetCamera(const std::shared_ptr<Camera>& camera);
     const std::shared_ptr<Camera>& GetCamera() const;
     void Update(float delta_time);

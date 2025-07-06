@@ -16,8 +16,8 @@
 class Mesh 
 {
 public:
-    std::vector<Vertex>    vertices;
-    std::vector<uint32_t>  indices;
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
     std::shared_ptr<Material> material;
 
     void ComputeLocalAABB();

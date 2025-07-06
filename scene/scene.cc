@@ -34,7 +34,7 @@ const std::vector<std::shared_ptr<Entity>>& Scene::GetEntities() const
     return entities;
 }
 
-const std::shared_ptr<Light_Manager>& Scene::GetLightManager()
+const std::shared_ptr<Light_Manager>& Scene::GetLightManager() const
 {
     return light_manager;
 }

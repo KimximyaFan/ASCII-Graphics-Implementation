@@ -47,3 +47,13 @@ void Light_Manager::UpdateLights(float delta_time)
     }
     */
 }
+
+void Light_Manager::SetAmbient(const Vec3& c)
+{
+    ambient = c;
+}
+
+const Vec3& Light_Manager::GetAmbient() const
+{
+    return ambient;
+}

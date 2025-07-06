@@ -144,16 +144,97 @@ V = WC to VC
 P = VC to projection 
 */
 
-void Renderer::DrawMesh (const Mesh& mesh, const Clipper& clipper, Mat4x4 M, Mat4x4 V, Mat4x4 P)
+void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights, 
+                         const Vec3& camera_pos,
+                         const Vec3& ambient,
+                         const Mesh& mesh,
+                         const Clipper& clipper, 
+                         Mat4x4 M, 
+                         Mat4x4 V, 
+                         Mat4x4 P)
+{
+    Mat4x4 PV = P * V;
+    Mat3x3 InverseTranspose_M = M.TopLeft3x3().InverseTranspose(); 
+    Mesh out_mesh = mesh;
+
+    /*
+        Illumination
+    */
+    for (size_t i=0; i<out_mesh.vertices.size(); ++i)
+    {
+        out_mesh.vertices[i].position = M * out_mesh.vertices[i].position;
+        out_mesh.vertices[i].normal = InverseTranspose_M * out_mesh.vertices[i].normal;
+
+        out_mesh.vertices[i].color = lighting_model->Shade(
+            out_mesh.vertices[i].position.ToVec3(),
+            out_mesh.vertices[i].normal,
+            camera_pos - out_mesh.vertices[i].position.ToVec3(),
+            *mesh.material,
+            lights,
+            out_mesh.vertices[i].color,
+            ambient
+        );
+    }
+
+    /*
+        Clipping
+    */
+
+    Mesh transformed_mesh = clipper.ClipMesh(out_mesh);
+
+    /*
+        Projection
+    */
+    for (auto& v : out_mesh.vertices)
+        v.position = PV * v.position;
+
+    for (size_t i=0; i+2<mesh.indices.size(); i+=3) 
+    {
+        RasterizeTriangle(transformed_mesh.vertices[transformed_mesh.indices[i+0]], 
+                          transformed_mesh.vertices[transformed_mesh.indices[i+1]], 
+                          transformed_mesh.vertices[transformed_mesh.indices[i+2]]);
+    }
+}
+
+void Renderer::Render(const Scene& scene)
+{
+    std::vector<std::shared_ptr<Light>> lights = scene.GetLightManager()->GetLights();
+    Vec3 ambient = scene.GetLightManager()->GetAmbient();
+
+    std::shared_ptr<Camera> camera = scene.GetCamera();
+    Mat4x4 V = camera->GetViewMatrix();
+    Mat4x4 P = camera->GetProjMatrix();
+    Vec3 camera_pos = camera->GetPosition();
+
+    Frustum frustum;
+    frustum.ExtractFrustumPlanes(V*P);
+
+    Clipper clipper;
+    clipper.SetFrustumPlanes(frustum.GetFrustumPlanes());
+
+    // AABB Culling
+    for ( auto& e : scene.GetEntities() )
+    {
+        AABB world_aabb = e->GetLocalAABB().MatrixConversion(e->GetLocalToWorldMatrix());
+
+        if ( clipper.IsAABBVisible(world_aabb) == false )
+            continue;
+
+        for ( auto& mesh : e->parts )
+            DrawMesh(lights, camera_pos, ambient, mesh, clipper, e->GetLocalToWorldMatrix(), V, P);
+    }
+}
+
+/*
+
+    void Renderer::DrawMesh (const Mesh& mesh, const Clipper& clipper, Mat4x4 M, Mat4x4 V, Mat4x4 P)
 {
     Mat4x4 PV = P * V;
     Mat3x3 InverseTranspose_M = M.TopLeft3x3().InverseTranspose(); 
     Mesh out_mesh = mesh;
     Vec3 camera_pos = scene->GetCamera()->GetPosition();
 
-    /*
-        Illumination
-    */
+
     for (size_t i=0; i<out_mesh.vertices.size(); ++i)
     {
         out_mesh.vertices[i].position = M * out_mesh.vertices[i].position;
@@ -172,17 +253,13 @@ void Renderer::DrawMesh (const Mesh& mesh, const Clipper& clipper, Mat4x4 M, Mat
         out_mesh.vertices[i].color.b *= intensity;
     }
 
-    /*
-        Projection
-    */
-    for (auto& v : out_mesh.vertices)
-        v.position = PV * v.position;
 
-    /*
-        Clipping
-    */
 
     Mesh transformed_mesh = clipper.ClipMesh(out_mesh);
+
+
+    for (auto& v : out_mesh.vertices)
+        v.position = PV * v.position;
 
     for (size_t i=0; i+2<mesh.indices.size(); i+=3) 
     {
@@ -224,3 +301,5 @@ void Renderer::Render(const Scene& scene)
             DrawMesh(mesh, clipper, e->GetLocalToWorldMatrix(), V, P);
     }
 }
+
+*/

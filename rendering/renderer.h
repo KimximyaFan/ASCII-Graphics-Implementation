@@ -23,7 +23,14 @@ public:
     void SetLightingModel (std::unique_ptr<Lighting_Model> lighting);
 
     // mvp : Model View Projection
-    void DrawMesh (const Mesh& mesh, const Clipper& clipper, Mat4x4 M, Mat4x4 V, Mat4x4 P);
+    void DrawMesh (const std::vector<std::shared_ptr<Light>>& lights, 
+                   const Vec3& camaera_pos,
+                   const Vec3& ambient,
+                   const Mesh& mesh,
+                   const Clipper& clipper, 
+                   Mat4x4 M, 
+                   Mat4x4 V, 
+                   Mat4x4 P);
 
     const std::vector<Color>& GetFrameBuffer () const;
 
@@ -37,7 +44,6 @@ private:
     std::vector<Color> frame_buffer;
     std::vector<float> z_buffer;
     std::unique_ptr<Lighting_Model> lighting_model;
-    std::unique_ptr<Scene> scene;
 
     Projected_Vertex ProjectVertex (const Vertex& v);
 

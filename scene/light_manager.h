@@ -16,6 +16,10 @@ public:
     void ClearLights();
     const std::vector<std::shared_ptr<Light>>& GetLights() const;
     void UpdateLights(float delta_time);
+
+    void SetAmbient(const Vec3& c);
+    const Vec3& GetAmbient() const;
 private:
     std::vector<std::shared_ptr<Light>> lights;
+    Vec3 ambient { 0.01f, 0.01f, 0.01f };
 };
