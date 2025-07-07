@@ -1,11 +1,7 @@
 
-
-렌더러 컬러에 따른 if분기
 Entity vertex normal preprocess 구현
 Clipper Clip Mesh 비효율적인거 최적화
-Main 함수 제작
-테스트용 엔티티 제작
-Rendering 테스트
+
 
 @@
 game 구현시 AABB 쪽 생각하고 개선해보기, 현재는 entity mesh 둘다 local aabb 가지고있고
