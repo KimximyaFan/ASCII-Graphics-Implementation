@@ -2,10 +2,10 @@
 
 #include <vector>
 #include <memory> 
-#include "primitive.h"
-#include "matrix.h"
-#include "color.h"
-#include "projected_vertex.h"
+#include "geometry/primitive.h"
+#include "math/matrix.h"
+#include "material/color.h"
+#include "geometry/projected_vertex.h"
 #include "light_models/lighting_model.h"
 #include "scene/scene.h"
 #include "culling/clipper.h"

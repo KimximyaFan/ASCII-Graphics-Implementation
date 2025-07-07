@@ -6,14 +6,13 @@
 #include "light/directional_light.h"
 #include "test.h"
 #include "light_models/blinn_phong.h"
-#include "input_handler.h"
 #include "fps_counter/fps_counter.h"
 #include "io/input_handler.h"
 #include "io/output_handler.h"
+#include "rendering/renderer.h"
 
 int main(int argc, char* argv[])
 {
-    // 1) 윈도우 크기 설정
     const int width  = 100;
     const int height = 100;
 
@@ -56,12 +55,15 @@ int main(int argc, char* argv[])
 
     Fps_Counter fps_counter;
     fps_counter.Start();
-
+ 
     while ( Input_Handler::IsSpacePressed() == false )
-    {
+    { 
+        printf("0\n");
         renderer.Render(scene);
+        printf("1\n");
         output_handler.PrintBuffer(renderer.GetFrameBuffer());
+        printf("2\n");
         int fps = fps_counter.Get_Fps();
+        printf("%d\n", fps);
     }
-    
 }

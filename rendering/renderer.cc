@@ -1,10 +1,9 @@
-#pragma once
 
 #include "renderer.h"
-#include "matrix.h"
 #include "culling/clipper.h"
 #include "culling/frustum.h"
 #include <algorithm>
+#include <iostream>
 
 const Color Renderer::clear_color = {0, 0, 0, 0};
 const float Renderer::clear_depth = 1.0f;
@@ -54,7 +53,6 @@ Projected_Vertex Renderer::ProjectVertex (const Vertex& v)
     /*
         NDC -> Screen Coordinate
     */
-
     Projected_Vertex out;
 
     out.x = (ndcX*0.5f + 0.5f) * width;
@@ -185,10 +183,10 @@ void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights,
     /*
         Projection
     */
-    for (auto& v : out_mesh.vertices)
+    for (auto& v : transformed_mesh.vertices)
         v.position = PV * v.position;
-
-    for (size_t i=0; i+2<mesh.indices.size(); i+=3) 
+ 
+    for (size_t i=0; i+2<transformed_mesh.indices.size(); i+=3) 
     {
         RasterizeTriangle(transformed_mesh.vertices[transformed_mesh.indices[i+0]], 
                           transformed_mesh.vertices[transformed_mesh.indices[i+1]], 
@@ -199,11 +197,15 @@ void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights,
 void Renderer::Render(const Scene& scene)
 {
     std::vector<std::shared_ptr<Light>> lights = scene.GetLightManager()->GetLights();
+
     Vec3 ambient = scene.GetLightManager()->GetAmbient();
 
     std::shared_ptr<Camera> camera = scene.GetCamera();
+
     Mat4x4 V = camera->GetViewMatrix();
+
     Mat4x4 P = camera->GetProjMatrix();
+
     Vec3 camera_pos = camera->GetPosition();
 
     Frustum frustum;
@@ -221,7 +223,9 @@ void Renderer::Render(const Scene& scene)
             continue;
 
         for ( auto& mesh : e->parts )
+        {
             DrawMesh(lights, camera_pos, ambient, mesh, clipper, e->GetLocalToWorldMatrix(), V, P);
+        }
     }
 }
 

@@ -55,5 +55,9 @@
         "ratio": "cpp",
         "iomanip": "cpp",
         "sstream": "cpp"
+    },
+
+    "code-runner.executorMap": {
+        "cpp": "powershell -Command 'g++ -I. (Get-ChildItem -Recurse -Filter *.cc | ForEach-Object { $_.FullName }) -o main.exe; if ($?) { ./main.exe }'"
     }
 }

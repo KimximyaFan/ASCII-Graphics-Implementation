@@ -1,4 +1,3 @@
-#pragma once
 
 #include "blinn_phong.h"
 

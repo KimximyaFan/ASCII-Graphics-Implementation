@@ -1,3 +1,5 @@
+#pragma once
+
 struct Material {
     float  ambient_coef;    // Ka
     float  diffuse_coef;    // Kd

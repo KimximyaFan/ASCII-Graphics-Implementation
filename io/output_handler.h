@@ -16,4 +16,5 @@ private:
     int height;
     HANDLE hConsole;
     std::vector<char> buf;
+    DWORD written;
 };

@@ -56,8 +56,6 @@ Mat3x3& Mat3x3::InverseTranspose()
     4x4 Matrix
 */
 
-Mat4x4::Mat4x4() {}
-
 Mat4x4::Mat4x4(float value) 
 {
     for (int i = 0; i < 4; i++)

@@ -5,12 +5,11 @@
 #include "entity.h"
 #include "light_manager.h"
 #include "camera.h"
-#include "rendering/renderer.h"
 
 class Scene
 {
 public:
-    Scene() = default;
+    Scene();
     ~Scene() = default;
 
     /*

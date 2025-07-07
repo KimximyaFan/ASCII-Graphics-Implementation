@@ -1,8 +1,9 @@
 #pragma once
 
-#include "geometry/primitive.h"
+
 #include "material/material.h"
 #include "math/matrix.h"
+#include "geometry/primitive.h"
 
 class Entity 
 {

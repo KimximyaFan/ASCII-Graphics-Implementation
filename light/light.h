@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vector.h"
-#include "color.h"
+#include "math/vector.h"
+#include "material/color.h"
 
 enum class Light_Type
 {

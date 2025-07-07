@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vector.h"
-#include "light.h"
+#include "math/vector.h"
+#include "light/light.h"
 #include <vector>
 #include <memory>
 #include "material/material.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "light.h"
+#include "light/light.h"
 #include <vector>
 #include <memory>
 

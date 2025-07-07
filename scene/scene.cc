@@ -1,7 +1,8 @@
-#pragma once
 
 #include "scene.h"
 #include <algorithm>
+
+Scene::Scene() : light_manager(std::make_shared<Light_Manager>()) {}
 
 void Scene::AddEntity(const std::shared_ptr<Entity>& entity)
 {

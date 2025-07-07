@@ -1,5 +1,3 @@
-#pragma once
-
 #include "camera.h"
 
 Camera::Camera(const Vec3& pos_vec,

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "color.h"
+#include "material/color.h"
 
 struct Projected_Vertex
 {

@@ -3,9 +3,9 @@
 
 #include <array>
 #include <vector>
-#include "primitive.h"
-#include "vector.h"
-#include "matrix.h"
+#include "geometry/primitive.h"
+#include "math/vector.h"
+#include "math/matrix.h"
 
 
 /*

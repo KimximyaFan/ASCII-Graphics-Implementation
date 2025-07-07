@@ -1,4 +1,3 @@
-#pragma once
 
 #include "light_manager.h"
 #include <algorithm>

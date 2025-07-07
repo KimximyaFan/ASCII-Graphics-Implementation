@@ -1,4 +1,3 @@
-#pragma once
 
 #include "fps_counter.h"
 
