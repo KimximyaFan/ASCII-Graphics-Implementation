@@ -8,6 +8,8 @@
 #include "light_models/blinn_phong.h"
 #include "input_handler.h"
 #include "fps_counter/fps_counter.h"
+#include "io/input_handler.h"
+#include "io/output_handler.h"
 
 int main(int argc, char* argv[])
 {
@@ -50,13 +52,15 @@ int main(int argc, char* argv[])
     Renderer renderer(width, height);
     renderer.SetLightingModel(std::make_unique<Blinn_Phong>());
 
+    Output_Handler output_handler(width, height);
+
     Fps_Counter fps_counter;
     fps_counter.Start();
 
     while ( Input_Handler::IsSpacePressed() == false )
     {
         renderer.Render(scene);
-
+        output_handler.PrintBuffer(renderer.GetFrameBuffer());
         int fps = fps_counter.Get_Fps();
     }
     
