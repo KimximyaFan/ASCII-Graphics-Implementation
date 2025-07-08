@@ -18,11 +18,11 @@ int main(int argc, char* argv[])
 
     Scene scene;
 
-    Vec3 camera_pos = Vec3(0.0f, 0.0f, 3.0f);
+    Vec3 camera_pos = Vec3(5.5f, 5.5f, 5.5f);
     Vec3 camera_target = Vec3(0.0f, 0.0f, 0.0f);
     Vec3 camera_up = Vec3(0.0f, 1.0, 0.0f);
-    float fov = 60.0f;
-    float aspect = width / height;
+    float fov = 45.0f;
+    float aspect = (float)width / (float)height;
     float near_plane = 0.1f;
     float far_plane = 50.0f;
 
@@ -38,13 +38,13 @@ int main(int argc, char* argv[])
 
     scene.SetCamera(camera_ptr);
  
-    scene.GetLightManager()->SetAmbient(Vec3(0.5f, 0.5f, 0.5f));
+    scene.GetLightManager()->SetAmbient(Vec3(0.05f, 0.05f, 0.05f));
 
-    auto key_light = std::make_shared<Directional_Light>(Vec3(10, 10, 10), 0.6f);
+    auto key_light = std::make_shared<Directional_Light>(Vec3(100, 100, 100), 0.8f);
 
     scene.GetLightManager()->AddLight(key_light);
 
-    auto entity = CreateTestCubeEntity(1.0f);
+    auto entity = CreateTestCubeEntity(2.0f);
 
     scene.AddEntity(entity);  
  
@@ -55,12 +55,27 @@ int main(int argc, char* argv[])
 
     Fps_Counter fps_counter;
     fps_counter.Start(); 
- 
+
+    //for (auto& col : renderer.GetFrameBuffer())
+        //printf("r=%.2f g=%.2f b=%.2f ", col.r, col.g, col.b);
+    
+    constexpr float angularSpeed = 60.0f * 3.14159265f / 180.0f;
+    auto lastTime = std::chrono::high_resolution_clock::now();
+    int fps = 0;
+
     while ( Input_Handler::IsSpacePressed() == false )
-    { 
+    {
+        auto now   = std::chrono::high_resolution_clock::now();
+        float dt   = std::chrono::duration<float>(now - lastTime).count();
+        lastTime   = now;
+
+        // 2-b) 엔티티 회전 업데이트 (Y축 기준)
+        entity->transform.SetRotation(
+            entity->transform.GetRotation() + Vec3(0, angularSpeed * dt, 0)
+        );
+        
         renderer.Render(scene);
-        //output_handler.PrintBuffer(renderer.GetFrameBuffer());
-        //int fps = fps_counter.Get_Fps();
-        //printf("%d\n", fp s); 
+        output_handler.PrintBuffer(renderer.GetFrameBuffer(), fps);
+        fps = fps_counter.Get_Fps();
     }
 }

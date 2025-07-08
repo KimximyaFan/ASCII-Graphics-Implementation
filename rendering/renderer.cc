@@ -229,7 +229,7 @@ void Renderer::Render(const Scene& scene)
     Clipper clipper;
     clipper.SetFrustumPlanes(frustum.GetFrustumPlanes());
 
-    
+    /*
     Vec3 cam = camera->GetPosition();
     printf("camera pos: (%.2f, %.2f, %.2f)\n",
         cam.x, cam.y, cam.z);
@@ -240,7 +240,7 @@ void Renderer::Render(const Scene& scene)
         printf("Plane %d: normal=(%.2f,%.2f,%.2f), d=%.2f\n",
             i, p.x, p.y, p.z, p.w);
     }
-    
+    */
 
     // AABB Culling
     for ( auto& e : scene.GetEntities() )

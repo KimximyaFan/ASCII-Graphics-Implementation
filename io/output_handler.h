@@ -9,12 +9,11 @@ class Output_Handler
 public:
     Output_Handler(int w, int h);
     
-    void PrintBuffer(const std::vector<Color>& frame_buffer);
+    void PrintBuffer(const std::vector<Color>& frame_buffer, int fps);
 
 private:
     int width;
     int height;
     HANDLE hConsole;
-    std::vector<char> buf;
     DWORD written;
 };

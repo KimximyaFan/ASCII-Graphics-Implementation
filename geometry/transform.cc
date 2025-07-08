@@ -2,6 +2,21 @@
 #include <cmath>
 #include "transform.h"
 
+const Vec3& Transform::GetPosition() const
+{
+    return position;
+}
+
+const Vec3& Transform::GetRotation() const
+{
+    return rotation;
+}
+
+const Vec3& Transform::GetScale() const
+{
+    return scale;
+}
+
 void Transform::SetPosition(const Vec3& p)
 {
     position = p;
