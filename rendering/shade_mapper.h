@@ -9,7 +9,9 @@ public:
     {
         float value = (color.r + color.g + color.b) / 3.0f;
 
-        if ( value < 0.2f )
+        if ( value < 0.05f )
+            return ' ';
+        else if ( value < 0.2f )
             return '\'';
         else if ( value < 0.4f )
             return '*';

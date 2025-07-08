@@ -1,9 +1,15 @@
 
 #include "clipper.h"
+#include <iostream>
 
 void Clipper::SetFrustumPlanes(const std::array<Vec4, 6>& planes)
 {
     frustum_planes = planes;
+}
+
+const std::array<Vec4, 6>& Clipper::GetFrustumPlanes()
+{
+    return frustum_planes;
 }
 
 bool Clipper::IsVertexInside(const Vertex& vertex, const Vec4& plane)

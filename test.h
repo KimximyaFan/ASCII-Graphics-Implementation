@@ -1,8 +1,11 @@
+#pragma once
+
 #include <memory>
 #include "scene/entity.h"
 #include "geometry/mesh.h"
 #include "material/material.h"
 #include "math/vector.h"
+#include <iostream>
 
 // 테스트용 큐브 Entity 생성
 std::shared_ptr<Entity> CreateTestCubeEntity(float size = 1.0f)

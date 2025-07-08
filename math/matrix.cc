@@ -296,7 +296,7 @@ Mat4x4 Mat4x4::Perspective(float fov, float aspect, float near, float far)
     mat.m[0][0] = cot_value / aspect;
     mat.m[1][1] = cot_value;
     mat.m[2][2] = (far + near) * inverse_near_minus_far;
-    mat.m[2][3] = (-2 * far * near) * inverse_near_minus_far;
+    mat.m[2][3] = (2 * far * near) * inverse_near_minus_far;
     mat.m[3][2] = -1.0f;
 
     return mat;
@@ -334,6 +334,8 @@ Mat4x4 Mat4x4::LookAt(const Vec3& camera_pos, const Vec3& look_at_pos, const Vec
     mat.m[0][3] = -Vec3::Dot(u, camera_pos);
     mat.m[1][3] = -Vec3::Dot(v, camera_pos);
     mat.m[2][3] = -Vec3::Dot(n, camera_pos);
+
+    mat.m[3][3] = 1;
 
     return mat;
 }

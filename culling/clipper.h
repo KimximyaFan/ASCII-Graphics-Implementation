@@ -30,6 +30,8 @@ public:
 
     void SetFrustumPlanes(const std::array<Vec4, 6>& planes);
 
+    const std::array<Vec4, 6>& GetFrustumPlanes();
+
     Mesh ClipMesh(const Mesh& mesh) const;
 
     bool IsAABBVisible(const AABB& box) const;

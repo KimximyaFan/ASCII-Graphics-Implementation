@@ -8,7 +8,6 @@ Output_Handler::Output_Handler(int w, int h)
 
 void Output_Handler::PrintBuffer(const std::vector<Color>& frame_buffer)
 {
-    printf("PrintBuffer 0\n");
     for (int y = 0; y < height; ++y)
     {
         for (int x = 0; x < width; ++x)
@@ -21,6 +20,5 @@ void Output_Handler::PrintBuffer(const std::vector<Color>& frame_buffer)
             {0, (SHORT)y},
             &written
         );
-    }
-    printf("PrintBuffer 1\n");
+    } 
 }

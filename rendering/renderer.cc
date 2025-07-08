@@ -11,7 +11,7 @@ const float Renderer::clear_depth = 1.0f;
 Renderer::Renderer (int w, int h)
     : width(w), height(h),
     frame_buffer(w*h),
-    z_buffer(w*h)
+    z_buffer(w*h) 
     { viewport_matrix = Mat4x4::ViewportTransformation(0, w, 0, h); }
 
 const std::vector<Color>& Renderer::GetFrameBuffer () const
@@ -175,10 +175,23 @@ void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights,
     }
 
     /*
+    for (auto& v : out_mesh.vertices)
+    {
+        printf("out r=%.2f g=%.2f b=%.2f\n", v.color.r, v.color.g, v.color.b);
+    }
+        */
+
+    /*
         Clipping
     */
 
     Mesh transformed_mesh = clipper.ClipMesh(out_mesh);
+    /*
+    for (auto& v : transformed_mesh.vertices)
+    {
+        printf("transformed r=%.2f g=%.2f b=%.2f\n", v.color.r, v.color.g, v.color.b);
+    }
+        */
 
     /*
         Projection
@@ -196,6 +209,8 @@ void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights,
 
 void Renderer::Render(const Scene& scene)
 {
+    ClearBuffers();
+
     std::vector<std::shared_ptr<Light>> lights = scene.GetLightManager()->GetLights();
 
     Vec3 ambient = scene.GetLightManager()->GetAmbient();
@@ -209,18 +224,45 @@ void Renderer::Render(const Scene& scene)
     Vec3 camera_pos = camera->GetPosition();
 
     Frustum frustum;
-    frustum.ExtractFrustumPlanes(V*P);
+    frustum.ExtractFrustumPlanes(P*V);
 
     Clipper clipper;
     clipper.SetFrustumPlanes(frustum.GetFrustumPlanes());
+
+    
+    Vec3 cam = camera->GetPosition();
+    printf("camera pos: (%.2f, %.2f, %.2f)\n",
+        cam.x, cam.y, cam.z);
+
+    auto planes = clipper.GetFrustumPlanes();
+    for (int i = 0; i < 6; ++i) {
+        Vec4 &p = planes[i];
+        printf("Plane %d: normal=(%.2f,%.2f,%.2f), d=%.2f\n",
+            i, p.x, p.y, p.z, p.w);
+    }
+    
 
     // AABB Culling
     for ( auto& e : scene.GetEntities() )
     {
         AABB world_aabb = e->GetLocalAABB().MatrixConversion(e->GetLocalToWorldMatrix());
+        
+        /*
+        auto local = e->GetLocalAABB();
+        auto world = world_aabb;
+        printf("Local AABB: min(%.2f,%.2f,%.2f) max(%.2f,%.2f,%.2f)\n",
+            local.min.x, local.min.y, local.min.z,
+            local.max.x, local.max.y, local.max.z);
+        printf("World AABB: min(%.2f,%.2f,%.2f) max(%.2f,%.2f,%.2f)\n",
+            world.min.x, world.min.y, world.min.z,
+            world.max.x, world.max.y, world.max.z);
 
+        printf("before aabb\n");
+        */
         if ( clipper.IsAABBVisible(world_aabb) == false )
             continue;
+
+        //printf("after aabb\n");
 
         for ( auto& mesh : e->parts )
         {

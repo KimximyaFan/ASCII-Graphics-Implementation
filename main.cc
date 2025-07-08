@@ -18,13 +18,13 @@ int main(int argc, char* argv[])
 
     Scene scene;
 
-    Vec3 camera_pos = Vec3(0.0f, 0.0f, 5.0f);
+    Vec3 camera_pos = Vec3(0.0f, 0.0f, 3.0f);
     Vec3 camera_target = Vec3(0.0f, 0.0f, 0.0f);
     Vec3 camera_up = Vec3(0.0f, 1.0, 0.0f);
     float fov = 60.0f;
     float aspect = width / height;
     float near_plane = 0.1f;
-    float far_plane = 100.0f;
+    float far_plane = 50.0f;
 
     auto camera_ptr = std::make_shared<Camera>(
         camera_pos,
@@ -33,37 +33,34 @@ int main(int argc, char* argv[])
         fov,
         aspect,
         near_plane,
-        far_plane
+        far_plane 
     );
 
     scene.SetCamera(camera_ptr);
+ 
+    scene.GetLightManager()->SetAmbient(Vec3(0.5f, 0.5f, 0.5f));
 
-    scene.GetLightManager()->SetAmbient(Vec3(0.1f, 0.1f, 0.1f));
-
-    auto key_light = std::make_shared<Directional_Light>(Vec3(1, 1, 1), 0.6f);
+    auto key_light = std::make_shared<Directional_Light>(Vec3(10, 10, 10), 0.6f);
 
     scene.GetLightManager()->AddLight(key_light);
 
     auto entity = CreateTestCubeEntity(1.0f);
 
-    scene.AddEntity(entity);
-
+    scene.AddEntity(entity);  
+ 
     Renderer renderer(width, height);
     renderer.SetLightingModel(std::make_unique<Blinn_Phong>());
 
     Output_Handler output_handler(width, height);
 
     Fps_Counter fps_counter;
-    fps_counter.Start();
+    fps_counter.Start(); 
  
     while ( Input_Handler::IsSpacePressed() == false )
     { 
-        printf("0\n");
         renderer.Render(scene);
-        printf("1\n");
-        output_handler.PrintBuffer(renderer.GetFrameBuffer());
-        printf("2\n");
-        int fps = fps_counter.Get_Fps();
-        printf("%d\n", fps);
+        //output_handler.PrintBuffer(renderer.GetFrameBuffer());
+        //int fps = fps_counter.Get_Fps();
+        //printf("%d\n", fp s); 
     }
 }
