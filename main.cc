@@ -23,8 +23,8 @@ int main(int argc, char* argv[])
     Vec3 camera_up = Vec3(0.0f, 1.0, 0.0f);
     float fov = 45.0f;
     float aspect = (float)width / (float)height;
-    float near_plane = 0.1f;
-    float far_plane = 50.0f;
+    float near_plane = -0.1f;
+    float far_plane = -50.0f;
 
     auto camera_ptr = std::make_shared<Camera>(
         camera_pos,

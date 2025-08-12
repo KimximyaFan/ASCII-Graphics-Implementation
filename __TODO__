@@ -1,3 +1,6 @@
+Rasterize Triangle 이 잘못되었던가 vs illumination이 잘못되었던가
+
+
 
 Entity vertex normal preprocess 구현
 Clipper Clip Mesh 비효율적인거 최적화

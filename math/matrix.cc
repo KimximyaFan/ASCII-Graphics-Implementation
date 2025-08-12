@@ -296,7 +296,7 @@ Mat4x4 Mat4x4::Perspective(float fov, float aspect, float near, float far)
     mat.m[0][0] = cot_value / aspect;
     mat.m[1][1] = cot_value;
     mat.m[2][2] = (far + near) * inverse_near_minus_far;
-    mat.m[2][3] = (2 * far * near) * inverse_near_minus_far;
+    mat.m[2][3] = (-2 * far * near) * inverse_near_minus_far;
     mat.m[3][2] = -1.0f;
 
     return mat;
