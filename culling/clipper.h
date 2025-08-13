@@ -28,13 +28,13 @@ class Clipper
 public:
     Clipper () {};
 
-    void SetFrustumPlanes(const std::array<Vec4, 6>& planes);
-
     const std::array<Vec4, 6>& GetFrustumPlanes();
 
     Mesh ClipMesh(const Mesh& mesh) const;
 
     bool IsAABBVisible(const AABB& box) const;
+
+    void ExtractFrustumPlanes(const Mat4x4& proj_view);
 
 private:
     std::array<Vec4, 6> frustum_planes;
