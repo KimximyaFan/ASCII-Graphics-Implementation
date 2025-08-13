@@ -1,7 +1,6 @@
 
 #include "renderer.h"
 #include "culling/clipper.h"
-#include "culling/frustum.h"
 #include <algorithm>
 #include <iostream>
 
@@ -156,13 +155,21 @@ void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights,
     Mesh out_mesh = mesh;
 
     /*
-        Illumination
+        MC to WC
     */
     for (size_t i=0; i<out_mesh.vertices.size(); ++i)
     {
         out_mesh.vertices[i].position = M * out_mesh.vertices[i].position;
-        out_mesh.vertices[i].normal = InverseTranspose_M * out_mesh.vertices[i].normal;
+        out_mesh.vertices[i].normal = Vec3::Normalize( InverseTranspose_M * out_mesh.vertices[i].normal );
+    }
 
+    //DebugCheckNormals(out_mesh);
+
+    /*
+        Illumination
+    */
+    for (size_t i=0; i<out_mesh.vertices.size(); ++i)
+    {
         out_mesh.vertices[i].color = lighting_model->Shade(
             out_mesh.vertices[i].position.ToVec3(),
             out_mesh.vertices[i].normal,
@@ -223,11 +230,8 @@ void Renderer::Render(const Scene& scene)
 
     Vec3 camera_pos = camera->GetPosition();
 
-    Frustum frustum;
-    frustum.ExtractFrustumPlanes(P*V);
-
     Clipper clipper;
-    clipper.SetFrustumPlanes(frustum.GetFrustumPlanes());
+    clipper.ExtractFrustumPlanes(P*V);
 
     /*
     Vec3 cam = camera->GetPosition();
