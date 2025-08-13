@@ -5,6 +5,8 @@ Rasterize Triangle 이 잘못되었던가 vs illumination이 잘못되었던가
 Entity vertex normal preprocess 구현
 Clipper Clip Mesh 비효율적인거 최적화
 
+@@
+Camera View Matrix 증명
 
 @@
 game 구현시 AABB 쪽 생각하고 개선해보기, 현재는 entity mesh 둘다 local aabb 가지고있고
