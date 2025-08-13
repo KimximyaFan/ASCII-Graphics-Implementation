@@ -177,13 +177,13 @@ float Vec3::Length() const
 Vec3 Vec3::Normalize() const
 {
     float len = Length();
-    return len != 0 ? *this / len : Vec3(0, 0, 0);
+    return (len > 1e-6f) ? *this / len : Vec3(0, 0, 0);
 }
 
 Vec3 Vec3::Normalize(const Vec3& a)
 {
     float len = a.Length();
-    return len != 0 ? a / len : Vec3(0, 0, 0);
+    return (len > 1e-6f) ? a / len : Vec3(0, 0, 0);
 }
 
 float Vec3::Length(const Vec3& a)
