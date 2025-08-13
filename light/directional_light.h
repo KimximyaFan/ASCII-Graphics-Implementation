@@ -5,11 +5,11 @@
 class Directional_Light : public Light
 {
 public:
-    Vec3 direction;
+    Vec3 position;
     float intensity;
 
-    Directional_Light (const Vec3& dir, const float intensity)
-        : direction(Vec3::Normalize(dir)), intensity(intensity) {}
+    Directional_Light (const Vec3& pos, const float intensity)
+        : position(Vec3::Normalize(pos)), intensity(intensity) {}
 
     Light_Type GetType () const override
     {
@@ -18,7 +18,7 @@ public:
 
     Vec3 GetDirection (const Vec3& ) const override
     {
-        return -direction;
+        return position;
     }
 
     float GetIntensity (const Vec3& ) const override
