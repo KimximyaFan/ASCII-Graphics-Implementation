@@ -44,7 +44,12 @@ int main(int argc, char* argv[])
 
     scene.GetLightManager()->AddLight(key_light);
 
-    auto entity = CreateCubeEntity_Flat24(2.0f);
+    std::shared_ptr<Entity> entity;
+
+    if ( true )
+        entity = CreateCubeEntity_Flat24(2.0f);
+    else
+        entity = CreateTestCubeEntity(2.0);
 
     scene.AddEntity(entity);  
  

@@ -1,6 +1,6 @@
-Rasterize Triangle 이 잘못되었던가 vs illumination이 잘못되었던가
-
-
+Rasterize triangle 점검,
+렌더링시 discrete 하게 반짝이는거 수정, smoothe 했으면 좋겠음
+정점 값과 정보들 디버깅 테스트
 
 Entity vertex normal preprocess 구현
 Clipper Clip Mesh 비효율적인거 최적화
