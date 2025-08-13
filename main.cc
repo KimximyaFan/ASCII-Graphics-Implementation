@@ -38,13 +38,13 @@ int main(int argc, char* argv[])
 
     scene.SetCamera(camera_ptr);
  
-    scene.GetLightManager()->SetAmbient(Vec3(0.05f, 0.05f, 0.05f));
-
-    auto key_light = std::make_shared<Directional_Light>(Vec3(100, 100, 100), 0.8f);
+    scene.GetLightManager()->SetAmbient(Vec3(0.25f, 0.25f, 0.25f));
+  
+    auto key_light = std::make_shared<Directional_Light>(Vec3(100, 100, 100), 1.0f);
 
     scene.GetLightManager()->AddLight(key_light);
 
-    auto entity = CreateTestCubeEntity(2.0f);
+    auto entity = CreateCubeEntity_Flat24(2.0f);
 
     scene.AddEntity(entity);  
  
@@ -54,15 +54,16 @@ int main(int argc, char* argv[])
     Output_Handler output_handler(width, height);
 
     Fps_Counter fps_counter;
-    fps_counter.Start(); 
-
+    fps_counter.Start();  
+ 
     //for (auto& col : renderer.GetFrameBuffer())
         //printf("r=%.2f g=%.2f b=%.2f ", col.r, col.g, col.b);
     
     constexpr float angularSpeed = 60.0f * 3.14159265f / 180.0f;
     auto lastTime = std::chrono::high_resolution_clock::now();
     int fps = 0;
-
+    
+     
     while ( Input_Handler::IsSpacePressed() == false )
     {
         auto now   = std::chrono::high_resolution_clock::now();
@@ -75,6 +76,7 @@ int main(int argc, char* argv[])
         );
         
         renderer.Render(scene);
+        
         output_handler.PrintBuffer(renderer.GetFrameBuffer(), fps);
         fps = fps_counter.Get_Fps();
     }
