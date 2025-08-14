@@ -4,6 +4,6 @@
 
 struct Projected_Vertex
 {
-    float x, y, z;
+    float x, y, z, invW;
     Color color;
 };
