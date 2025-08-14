@@ -13,8 +13,8 @@
 
 int main(int argc, char* argv[])
 {
-    const int width  = 100;
-    const int height = 100;
+    const int width  = 120;
+    const int height = 30;
 
     Scene scene;
 
@@ -22,7 +22,8 @@ int main(int argc, char* argv[])
     Vec3 camera_target = Vec3(0.0f, 0.0f, 0.0f);
     Vec3 camera_up = Vec3(0.0f, 1.0, 0.0f);
     float fov = 45.0f;
-    float aspect = (float)width / (float)height;
+    float cell_aspect = 0.5f;
+    float aspect = (float)width / (float)height * cell_aspect;
     float near_plane = -0.1f;
     float far_plane = -50.0f;
 
@@ -40,16 +41,16 @@ int main(int argc, char* argv[])
  
     scene.GetLightManager()->SetAmbient(Vec3(0.25f, 0.25f, 0.25f));
   
-    auto key_light = std::make_shared<Directional_Light>(Vec3(100, 100, 100), 1.0f);
+    auto key_light = std::make_shared<Directional_Light>(Vec3(50, 100, 50), 1.0f);
 
     scene.GetLightManager()->AddLight(key_light);
 
     std::shared_ptr<Entity> entity;
-
+ 
     if ( true )
-        entity = CreateCubeEntity_Flat24(2.0f);
+        entity = CreateCubeEntity_Flat24(5.0f);
     else
-        entity = CreateTestCubeEntity(2.0);
+        entity = CreateTestCubeEntity(5.0);
 
     scene.AddEntity(entity);  
  
@@ -60,7 +61,7 @@ int main(int argc, char* argv[])
 
     Fps_Counter fps_counter;
     fps_counter.Start();  
- 
+
     //for (auto& col : renderer.GetFrameBuffer())
         //printf("r=%.2f g=%.2f b=%.2f ", col.r, col.g, col.b);
     
@@ -68,7 +69,22 @@ int main(int argc, char* argv[])
     auto lastTime = std::chrono::high_resolution_clock::now();
     int fps = 0;
     
-     
+    // 라이트 dir 파라미터(바로 아래 라인 중요!)
+    //Vec3 light_dir_param = Vec3(100,100,100);   // ← 지금 코드 유지(윗면은 안 맞음)
+                                                // 윗면(+Y)도 맞게 하려면 Vec3(-100,-100,-100) 으로 바꿔라.
+    /*
+    const int degs[12] = {30,60,90,120,150,180,210,240,270,300,330,360};
+    for (int k = 0; k < 12; ++k)
+    {
+        const float deg = (float)degs[k];
+        entity->transform.SetRotation(Vec3(0.0f, deg * 3.14159265f / 180.0f, 0.0f));
+
+        renderer.DebugShadeNoRaster_DirectionalOnly(scene, deg, light_dir_param);
+        printf("------------------------------------------------------------\n");
+    }
+    */
+  
+    
     while ( Input_Handler::IsSpacePressed() == false )
     {
         auto now   = std::chrono::high_resolution_clock::now();
