@@ -175,8 +175,8 @@ std::shared_ptr<Entity> CreateCubeEntity_Flat24(float size = 1.0f)
     // 엔티티
     auto entity = std::make_shared<Entity>();
     entity->parts.push_back(std::move(mesh));
-    entity->transform.position = Vec3(0, 3.0f, 0);
-    entity->transform.scale    = Vec3(1.0f, 0.4f, 1.0f);
+    entity->transform.position = Vec3(0, 0.0f, 0);
+    entity->transform.scale    = Vec3(1.0f, 1.0f, 1.0f);
     entity->ComputeLocalAABB();
     return entity;
 }
