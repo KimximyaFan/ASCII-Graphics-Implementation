@@ -53,7 +53,7 @@ Projected_Vertex Renderer::ProjectVertex (const Vertex& v)
         NDC -> Screen Coordinate
     */
     Projected_Vertex out;
-
+    out.invW = invW;
     out.x = (ndcX*0.5f + 0.5f) * width;
     // 배열의 y축은 위에서 아래로 가기때문에, y를 뒤집어줘야함, height - y 
     out.y = (1.0f - (ndcY*0.5f + 0.5f)) * height;
@@ -111,19 +111,31 @@ void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vert
             if ( w0 < 0 || w1 < 0 || w2 < 0)
                 continue;
 
-            float z = 1.0f / (w0/A.z + w1/B.z + w2/C.z);
+            float denom = w0*A.invW + w1*B.invW + w2*C.invW;
+
+            if (denom <= 0.0f) continue;
+
+            float depth = (w0*A.z*A.invW + w1*B.z*B.invW + w2*C.z*C.invW) / denom;
+            
+            //float z = 1.0f / (w0/A.z + w1/B.z + w2/C.z);
 
             int index = y*width + x;
 
-            if ( z < z_buffer[index] )
+            if ( depth < z_buffer[index] )
             {
-                z_buffer[index] = z;
+                z_buffer[index] = depth;
 
                 Color col;
+                /*
                 col.r = ((w0/A.z)*A.color.r + (w1/B.z)*B.color.r + (w2/C.z)*C.color.r) * z;
                 col.g = ((w0/A.z)*A.color.g + (w1/B.z)*B.color.g + (w2/C.z)*C.color.g) * z;
                 col.b = ((w0/A.z)*A.color.b + (w1/B.z)*B.color.b + (w2/C.z)*C.color.b) * z;
                 col.a = ((w0/A.z)*A.color.a + (w1/B.z)*B.color.a + (w2/C.z)*C.color.a) * z;
+                */
+                col.r = (w0*A.color.r*A.invW + w1*B.color.r*B.invW + w2*C.color.r*C.invW) / denom;
+                col.g = (w0*A.color.g*A.invW + w1*B.color.g*B.invW + w2*C.color.g*C.invW) / denom;
+                col.b = (w0*A.color.b*A.invW + w1*B.color.b*B.invW + w2*C.color.b*C.invW) / denom;
+                col.a = (w0*A.color.a*A.invW + w1*B.color.a*B.invW + w2*C.color.a*C.invW) / denom;
                 frame_buffer[index] = col;
             }
         }
@@ -353,3 +365,99 @@ void Renderer::Render(const Scene& scene)
 }
 
 */
+
+
+static inline Vec3 ExpectedFaceNormalAfterY(float deg, const Vec3& N0 /* MC face normal */)
+{
+    const float rad = deg * 3.14159265f / 180.0f;
+    const float c = std::cos(rad), s = std::sin(rad);
+    // Y축 회전 행렬 R_y(θ) 적용 (X,Z만 변함)
+    Vec3 N;
+    N.x =  c * N0.x + 0.0f * N0.y + s * N0.z;
+    N.y =  0.0f;
+    N.y +=      N0.y; // Y는 보존
+    N.z = -s * N0.x + 0.0f * N0.y + c * N0.z;
+    return Vec3::Normalize(N);
+}
+
+void Renderer::DebugShadeNoRaster_DirectionalOnly(const Scene& scene, float angle_deg, const Vec3& dir_param)
+{
+    const auto lights  = scene.GetLightManager()->GetLights();
+    const Vec3 ambient = scene.GetLightManager()->GetAmbient();
+    const auto cam     = scene.GetCamera();
+    const Vec3 cam_pos = cam->GetPosition();
+
+    // 디렉셔널 기대치용 고정 L (네 구현과 동일한 규칙)
+    const Vec3 L_dir = Vec3::Normalize(dir_param);
+
+    for (auto& e : scene.GetEntities())
+    {
+        const Mat4x4 M   = e->GetLocalToWorldMatrix();
+        const Mat3x3 NIT = M.TopLeft3x3().InverseTranspose();
+
+        for (const auto& mesh : e->parts)
+        {
+            for (size_t i = 0; i < mesh.vertices.size(); ++i)
+            {
+                const Vertex& vin = mesh.vertices[i];
+
+                // --- 실제 파이프라인 값 ---
+                const Vec3 P = (M * vin.position).ToVec3();
+                const Vec3 N = Vec3::Normalize(NIT * vin.normal);
+                const Vec3 V = Vec3::Normalize(cam_pos - P);
+
+                float sum_diff = 0.0f, sum_spec = 0.0f, NL_last = 0.0f, NH_last = 0.0f;
+                for (auto& L : lights)
+                {
+                    const float I  = L->GetIntensity(P);
+                    const Vec3  Ld = Vec3::Normalize(L->GetDirection(P)); // == L_dir일 것
+                    const float NL = std::max(0.0f, Vec3::Dot(N, Ld));
+                    if (NL > 0.0f)
+                    {
+                        sum_diff += mesh.material->diffuse_coef * I * NL;
+                        if (mesh.material->shininess > 0.0f && mesh.material->specular_coef > 0.0f)
+                        {
+                            const Vec3 H  = Vec3::Normalize(Ld + V);
+                            const float NH = std::max(0.0f, Vec3::Dot(N, H));
+                            sum_spec += mesh.material->specular_coef * I * std::pow(NH, mesh.material->shininess);
+                            NH_last = NH;
+                        }
+                        NL_last = NL;
+                    }
+                }
+                Color actual;
+                actual.r = vin.color.r * (sum_diff + mesh.material->ambient_coef * ambient.x) + sum_spec;
+                actual.g = vin.color.g * (sum_diff + mesh.material->ambient_coef * ambient.y) + sum_spec;
+                actual.b = vin.color.b * (sum_diff + mesh.material->ambient_coef * ambient.z) + sum_spec;
+
+                // --- 해석적 기대치 (Y-회전만 가정) ---
+                // 큐브는 면당 고정 노멀(±X,±Y,±Z)라서 vin.normal이 바로 N0
+                Vec3 N0 = vin.normal; // MC face normal
+                Vec3 Nexp = ExpectedFaceNormalAfterY(angle_deg, N0); // 회전만 반영
+                const float NL_exp = std::max(0.0f, Vec3::Dot(Nexp, L_dir));
+                float diff_exp = mesh.material->diffuse_coef * 1.0f * NL_exp;
+                float spec_exp = 0.0f;
+                if (NL_exp > 0.0f && mesh.material->shininess > 0.0f && mesh.material->specular_coef > 0.0f)
+                {
+                    const Vec3 H = Vec3::Normalize(L_dir + V);
+                    const float NH = std::max(0.0f, Vec3::Dot(Nexp, H));
+                    spec_exp = mesh.material->specular_coef * 1.0f * std::pow(NH, mesh.material->shininess);
+                }
+                Color expect;
+                expect.r = vin.color.r * (diff_exp + mesh.material->ambient_coef * ambient.x) + spec_exp;
+                expect.g = vin.color.g * (diff_exp + mesh.material->ambient_coef * ambient.y) + spec_exp;
+                expect.b = vin.color.b * (diff_exp + mesh.material->ambient_coef * ambient.z) + spec_exp;
+
+                // --- 차이 프린트 ---
+                auto pr = [&](const char* tag, const Color& C){
+                    printf("%s C(%.3f, %.3f, %.3f)", tag, C.r, C.g, C.b);
+                };
+                printf("[deg=%3.0f] v%02zu  P(%.2f,%.2f,%.2f)  N_act(%.3f,%.3f,%.3f)  N_exp(%.3f,%.3f,%.3f)  |NL_act=%.3f|\n",
+                       angle_deg, i, P.x, P.y, P.z, N.x, N.y, N.z, Nexp.x, Nexp.y, Nexp.z, NL_last);
+                pr("  actual ", actual);
+                printf("   "); pr("expect ", expect);
+                printf("   Δ(%.3f, %.3f, %.3f)\n", actual.r - expect.r, actual.g - expect.g, actual.b - expect.b);
+            }
+        }
+    }
+}
