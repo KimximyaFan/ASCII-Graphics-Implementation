@@ -89,6 +89,36 @@ std::vector<Vertex> Clipper::SutherlandHodgman(const std::vector<Vertex>& input,
     return output;
 }
 
+Mesh Clipper::BackFaceRemoval(const Mesh& in, const Vec3& view_direction) const
+{
+    Mesh out;
+    out.material = in.material;
+
+    out.vertices = in.vertices;
+    out.indices.reserve(in.indices.size());
+
+    const auto triCount = in.indices.size() / 3;
+    for (size_t t = 0; t < triCount; ++t)
+    {
+        uint32_t i0 = in.indices[3*t + 0];
+        uint32_t i1 = in.indices[3*t + 1];
+        uint32_t i2 = in.indices[3*t + 2];
+
+        Vec3 normal_avg = in.vertices[i0].normal + 
+                          in.vertices[i1].normal + 
+                          in.vertices[i2].normal;
+
+        if (Vec3::Dot( normal_avg, view_direction) < 0.0f)
+        {
+            out.indices.push_back(i0);
+            out.indices.push_back(i1);
+            out.indices.push_back(i2);
+        }
+    }
+
+    return out;
+}
+
 Mesh Clipper::ClipMesh(const Mesh& mesh) const
 {
     Mesh output;

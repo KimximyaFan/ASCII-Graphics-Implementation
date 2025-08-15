@@ -30,6 +30,8 @@ public:
 
     const std::array<Vec4, 6>& GetFrustumPlanes();
 
+    Mesh BackFaceRemoval(const Mesh& mesh, const Vec3& view_direction) const;
+
     Mesh ClipMesh(const Mesh& mesh) const;
 
     bool IsAABBVisible(const AABB& box) const;
