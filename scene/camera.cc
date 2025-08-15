@@ -34,3 +34,8 @@ void Camera::SetPerspective(float fov, float aspct, float near, float far)
     z_near = near;
     z_far = far;
 }
+
+Vec3 Camera::GetViewDirection() const
+{
+    return Vec3::Normalize(target - position);
+}

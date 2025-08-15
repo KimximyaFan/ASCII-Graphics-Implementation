@@ -23,6 +23,7 @@ public:
     Vec3 GetPosition() const { return position; }
     Vec3 GetTarget() const { return target; }
     Vec3 GetUp() const { return up; }
+    Vec3 GetViewDirection() const;
     
     Mat4x4 GetViewMatrix() const;
     Mat4x4 GetProjMatrix() const;
