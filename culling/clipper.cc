@@ -89,36 +89,6 @@ std::vector<Vertex> Clipper::SutherlandHodgman(const std::vector<Vertex>& input,
     return output;
 }
 
-Mesh Clipper::BackFaceRemoval(const Mesh& in, const Vec3& view_direction) const
-{
-    Mesh out;
-    out.material = in.material;
-
-    out.vertices = in.vertices;
-    out.indices.reserve(in.indices.size());
-
-    const auto triCount = in.indices.size() / 3;
-    for (size_t t = 0; t < triCount; ++t)
-    {
-        uint32_t i0 = in.indices[3*t + 0];
-        uint32_t i1 = in.indices[3*t + 1];
-        uint32_t i2 = in.indices[3*t + 2];
-
-        Vec3 normal_avg = in.vertices[i0].normal + 
-                          in.vertices[i1].normal + 
-                          in.vertices[i2].normal;
-
-        if (Vec3::Dot( normal_avg, view_direction) < 0.0f)
-        {
-            out.indices.push_back(i0);
-            out.indices.push_back(i1);
-            out.indices.push_back(i2);
-        }
-    }
-
-    return out;
-}
-
 Mesh Clipper::ClipMesh(const Mesh& mesh) const
 {
     Mesh output;
@@ -232,4 +202,98 @@ void Clipper::ExtractFrustumPlanes(const Mat4x4& proj_view)
         float len = std::sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
         p /= len;
     }
+}
+
+Mesh Clipper::BackFaceRemoval(const Mesh& in, const Vec3& view_direction) const
+{
+    Mesh out;
+    out.material = in.material;
+
+    out.vertices = in.vertices;
+    out.indices.reserve(in.indices.size());
+
+    const auto triCount = in.indices.size() / 3;
+    for (size_t t = 0; t < triCount; ++t)
+    {
+        uint32_t i0 = in.indices[3*t + 0];
+        uint32_t i1 = in.indices[3*t + 1];
+        uint32_t i2 = in.indices[3*t + 2];
+
+        Vec3 normal_avg = in.vertices[i0].normal + 
+                          in.vertices[i1].normal + 
+                          in.vertices[i2].normal;
+
+        if (Vec3::Dot( normal_avg, view_direction) < 0.0f)
+        {
+            out.indices.push_back(i0);
+            out.indices.push_back(i1);
+            out.indices.push_back(i2);
+        }
+    }
+
+    return out;
+}
+
+Mesh Clipper::BackFaceRemoval2(const Mesh& in, const Mat4x4& V) const
+{
+    Mesh out;
+    out.material = in.material;
+    out.vertices = in.vertices;
+    out.indices.reserve(in.indices.size());
+    Mat3x3 V_topleft = V.TopLeft3x3();
+
+    const auto triCount = in.indices.size() / 3;
+    for (size_t t = 0; t < triCount; ++t)
+    {
+        const uint32_t i0 = in.indices[3*t + 0];
+        const uint32_t i1 = in.indices[3*t + 1];
+        const uint32_t i2 = in.indices[3*t + 2];
+
+        const Vec3 n0 = V_topleft * in.vertices[i0].normal;
+        const Vec3 n1 = V_topleft * in.vertices[i1].normal;
+        const Vec3 n2 = V_topleft * in.vertices[i2].normal;
+        const Vec3 n_avg = Vec3::Normalize( n0 + n1 + n2 );
+
+        if ( n_avg.z < 0.0f )
+        {
+            out.indices.push_back(i0);
+            out.indices.push_back(i1);
+            out.indices.push_back(i2);
+        }
+    }
+    return out;
+}
+
+Mesh Clipper::BackFaceCull_View(const Mesh& in, const Mat4x4& V) const
+{
+    Mesh out;
+    out.material = in.material;
+    out.vertices = in.vertices;
+    out.indices.reserve(in.indices.size());
+
+    const auto triCount = in.indices.size() / 3;
+    for (size_t t = 0; t < triCount; ++t)
+    {
+        const uint32_t i0 = in.indices[3*t + 0];
+        const uint32_t i1 = in.indices[3*t + 1];
+        const uint32_t i2 = in.indices[3*t + 2];
+
+        const Vec3 p0v = (V * in.vertices[i0].position).ToVec3();
+        const Vec3 p1v = (V * in.vertices[i1].position).ToVec3();
+        const Vec3 p2v = (V * in.vertices[i2].position).ToVec3();
+
+        const Vec3 e1 = p1v - p0v;
+        const Vec3 e2 = p2v - p0v;
+        const Vec3 n  = Vec3::Cross(e1, e2);
+
+        const Vec3 to_eye = -p0v;
+
+        if (Vec3::Dot(n, to_eye) > 0.0f)
+        {
+            out.indices.push_back(i0);
+            out.indices.push_back(i1);
+            out.indices.push_back(i2);
+        }
+    }
+    return out;
 }

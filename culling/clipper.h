@@ -30,13 +30,17 @@ public:
 
     const std::array<Vec4, 6>& GetFrustumPlanes();
 
-    Mesh BackFaceRemoval(const Mesh& mesh, const Vec3& view_direction) const;
-
     Mesh ClipMesh(const Mesh& mesh) const;
 
     bool IsAABBVisible(const AABB& box) const;
 
     void ExtractFrustumPlanes(const Mat4x4& proj_view);
+
+    Mesh BackFaceRemoval(const Mesh& mesh, const Vec3& view_direction) const;
+
+    Mesh BackFaceRemoval2(const Mesh& in, const Mat4x4& V) const;
+
+    Mesh BackFaceCull_View(const Mesh& in, const Mat4x4& V) const;
 
 private:
     std::array<Vec4, 6> frustum_planes;
