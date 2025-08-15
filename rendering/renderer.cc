@@ -120,7 +120,7 @@ void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vert
             float z = 1.0f / (w0/A.z + w1/B.z + w2/C.z);
 
             int index = y*width + x;
-
+            /*
             Color col;
 
             col.r = ((w0/A.z)*A.color.r + (w1/B.z)*B.color.r + (w2/C.z)*C.color.r) * z;
@@ -133,8 +133,8 @@ void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vert
 
             if ( buffer_intensity < current_intensity )
                 frame_buffer[index] = col;
-
-            /*
+            */
+            
             if ( z < z_buffer[index] )
             {
                 z_buffer[index] = z;
@@ -154,7 +154,7 @@ void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vert
                 
                 frame_buffer[index] = col;
             }
-            */
+            
         }
     }
 }
@@ -194,8 +194,10 @@ void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights,
         out_mesh.vertices[i].normal = Vec3::Normalize( InverseTranspose_M * out_mesh.vertices[i].normal );
     }
 
+    out_mesh = clipper.BackFaceCull_View(out_mesh, V);
     //DebugCheckNormals(out_mesh);
     //out_mesh = clipper.BackFaceRemoval(out_mesh, view_direction);
+    //out_mesh = clipper.BackFaceRemoval2(out_mesh, V);
 
     /*
         Illumination
