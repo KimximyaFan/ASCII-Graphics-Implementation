@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
         near_plane,
         far_plane 
     );
-
+ 
     scene.SetCamera(camera_ptr);
  
     scene.GetLightManager()->SetAmbient(Vec3(0.25f, 0.25f, 0.25f));
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 
     Fps_Counter fps_counter;
     fps_counter.Start();  
-
+ 
     //for (auto& col : renderer.GetFrameBuffer())
         //printf("r=%.2f g=%.2f b=%.2f ", col.r, col.g, col.b);
     
@@ -82,9 +82,9 @@ int main(int argc, char* argv[])
         renderer.DebugShadeNoRaster_DirectionalOnly(scene, deg, light_dir_param);
         printf("------------------------------------------------------------\n");
     }
-    */
-  
-    
+    */     
+       
+     
     while ( Input_Handler::IsSpacePressed() == false )
     {
         auto now   = std::chrono::high_resolution_clock::now();
@@ -97,7 +97,6 @@ int main(int argc, char* argv[])
         );
         
         renderer.Render(scene);
-        
         output_handler.PrintBuffer(renderer.GetFrameBuffer(), fps);
         fps = fps_counter.Get_Fps();
     }
