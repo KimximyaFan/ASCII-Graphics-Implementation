@@ -111,33 +111,50 @@ void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vert
             if ( w0 < 0 || w1 < 0 || w2 < 0)
                 continue;
 
-            float denom = w0*A.invW + w1*B.invW + w2*C.invW;
+            //float denom = w0*A.invW + w1*B.invW + w2*C.invW;
 
-            if (denom <= 0.0f) continue;
+            //if (denom <= 0.0f) continue;
 
-            float depth = (w0*A.z*A.invW + w1*B.z*B.invW + w2*C.z*C.invW) / denom;
+            //float depth = (w0*A.z*A.invW + w1*B.z*B.invW + w2*C.z*C.invW) / denom;
             
-            //float z = 1.0f / (w0/A.z + w1/B.z + w2/C.z);
+            float z = 1.0f / (w0/A.z + w1/B.z + w2/C.z);
 
             int index = y*width + x;
 
-            if ( depth < z_buffer[index] )
+            Color col;
+
+            col.r = ((w0/A.z)*A.color.r + (w1/B.z)*B.color.r + (w2/C.z)*C.color.r) * z;
+            col.g = ((w0/A.z)*A.color.g + (w1/B.z)*B.color.g + (w2/C.z)*C.color.g) * z;
+            col.b = ((w0/A.z)*A.color.b + (w1/B.z)*B.color.b + (w2/C.z)*C.color.b) * z;
+            col.a = ((w0/A.z)*A.color.a + (w1/B.z)*B.color.a + (w2/C.z)*C.color.a) * z;
+
+            float buffer_intensity = frame_buffer[index].r + frame_buffer[index].g + frame_buffer[index].b;
+            float current_intensity = col.r + col.g + col.b;
+
+            if ( buffer_intensity < current_intensity )
+                frame_buffer[index] = col;
+
+            /*
+            if ( z < z_buffer[index] )
             {
-                z_buffer[index] = depth;
+                z_buffer[index] = z;
 
                 Color col;
-                /*
+                
                 col.r = ((w0/A.z)*A.color.r + (w1/B.z)*B.color.r + (w2/C.z)*C.color.r) * z;
                 col.g = ((w0/A.z)*A.color.g + (w1/B.z)*B.color.g + (w2/C.z)*C.color.g) * z;
                 col.b = ((w0/A.z)*A.color.b + (w1/B.z)*B.color.b + (w2/C.z)*C.color.b) * z;
                 col.a = ((w0/A.z)*A.color.a + (w1/B.z)*B.color.a + (w2/C.z)*C.color.a) * z;
-                */
-                col.r = (w0*A.color.r*A.invW + w1*B.color.r*B.invW + w2*C.color.r*C.invW) / denom;
-                col.g = (w0*A.color.g*A.invW + w1*B.color.g*B.invW + w2*C.color.g*C.invW) / denom;
-                col.b = (w0*A.color.b*A.invW + w1*B.color.b*B.invW + w2*C.color.b*C.invW) / denom;
-                col.a = (w0*A.color.a*A.invW + w1*B.color.a*B.invW + w2*C.color.a*C.invW) / denom;
+                
+                
+                //col.r = (w0*A.color.r*A.invW + w1*B.color.r*B.invW + w2*C.color.r*C.invW) / denom;
+                //col.g = (w0*A.color.g*A.invW + w1*B.color.g*B.invW + w2*C.color.g*C.invW) / denom;
+                //col.b = (w0*A.color.b*A.invW + w1*B.color.b*B.invW + w2*C.color.b*C.invW) / denom;
+                //col.a = (w0*A.color.a*A.invW + w1*B.color.a*B.invW + w2*C.color.a*C.invW) / denom;
+                
                 frame_buffer[index] = col;
             }
+            */
         }
     }
 }
@@ -156,11 +173,13 @@ P = VC to projection
 void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights, 
                          const Vec3& camera_pos,
                          const Vec3& ambient,
+                         const Vec3& view_direction,
                          const Mesh& mesh,
                          const Clipper& clipper, 
                          Mat4x4 M, 
                          Mat4x4 V, 
-                         Mat4x4 P)
+                         Mat4x4 P
+                        )
 {
     Mat4x4 PV = P * V;
     Mat3x3 InverseTranspose_M = M.TopLeft3x3().InverseTranspose(); 
@@ -176,6 +195,7 @@ void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights,
     }
 
     //DebugCheckNormals(out_mesh);
+    //out_mesh = clipper.BackFaceRemoval(out_mesh, view_direction);
 
     /*
         Illumination
@@ -240,6 +260,8 @@ void Renderer::Render(const Scene& scene)
 
     Mat4x4 P = camera->GetProjMatrix();
 
+    Vec3 view_direction = camera->GetViewDirection();
+
     Vec3 camera_pos = camera->GetPosition();
 
     Clipper clipper;
@@ -282,7 +304,7 @@ void Renderer::Render(const Scene& scene)
 
         for ( auto& mesh : e->parts )
         {
-            DrawMesh(lights, camera_pos, ambient, mesh, clipper, e->GetLocalToWorldMatrix(), V, P);
+            DrawMesh(lights, camera_pos, ambient, view_direction, mesh, clipper, e->GetLocalToWorldMatrix(), V, P);
         }
     }
 }
