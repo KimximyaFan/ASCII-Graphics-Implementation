@@ -8,7 +8,7 @@ Output_Handler::Output_Handler(int w, int h)
 
 void Output_Handler::PrintBuffer(const std::vector<Color>& frame_buffer, int fps)
 {
-    char buf[height][width];
+    char buf[height+2][width];
 
     for (int y = 0; y < height; ++y)
     {
@@ -27,7 +27,7 @@ void Output_Handler::PrintBuffer(const std::vector<Color>& frame_buffer, int fps
         );
         */
     }
-    snprintf(buf[30], width, "FPS: %d", fps);
+    snprintf(buf[28], width, "FPS: %d", fps);
 
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     for (int y = 0; y < height; ++y) {
