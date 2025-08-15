@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
     float aspect = (float)width / (float)height * cell_aspect;
     float near_plane = -0.1f;
     float far_plane = -50.0f;
-
+ 
     auto camera_ptr = std::make_shared<Camera>(
         camera_pos,
         camera_target,
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
         near_plane,
         far_plane 
     );
- 
+  
     scene.SetCamera(camera_ptr);
  
     scene.GetLightManager()->SetAmbient(Vec3(0.25f, 0.25f, 0.25f));
@@ -75,16 +75,16 @@ int main(int argc, char* argv[])
     /*
     const int degs[12] = {30,60,90,120,150,180,210,240,270,300,330,360};
     for (int k = 0; k < 12; ++k)
-    {
+    { 
         const float deg = (float)degs[k];
         entity->transform.SetRotation(Vec3(0.0f, deg * 3.14159265f / 180.0f, 0.0f));
 
         renderer.DebugShadeNoRaster_DirectionalOnly(scene, deg, light_dir_param);
         printf("------------------------------------------------------------\n");
     }
-    */     
-       
-     
+    */      
+         
+      
     while ( Input_Handler::IsSpacePressed() == false )
     {
         auto now   = std::chrono::high_resolution_clock::now();
