@@ -7,6 +7,6 @@ struct Vertex
 {
     Vec4 position;
     Vec3 normal;
-    //Vec2 uv;
+    Vec2 uv;
     Color color;
 };

@@ -173,7 +173,6 @@ P = VC to projection
 void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights, 
                          const Vec3& camera_pos,
                          const Vec3& ambient,
-                         const Vec3& view_direction,
                          const Mesh& mesh,
                          const Clipper& clipper, 
                          Mat4x4 M, 
@@ -195,6 +194,7 @@ void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights,
     }
 
     out_mesh = clipper.BackFaceCull_View(out_mesh, V);
+    //out_mesh = clipper.BackFaceCull_View(out_mesh, camera_pos);
     //DebugCheckNormals(out_mesh);
     //out_mesh = clipper.BackFaceRemoval(out_mesh, view_direction);
     //out_mesh = clipper.BackFaceRemoval2(out_mesh, V);
@@ -306,7 +306,7 @@ void Renderer::Render(const Scene& scene)
 
         for ( auto& mesh : e->parts )
         {
-            DrawMesh(lights, camera_pos, ambient, view_direction, mesh, clipper, e->GetLocalToWorldMatrix(), V, P);
+            DrawMesh(lights, camera_pos, ambient, mesh, clipper, e->GetLocalToWorldMatrix(), V, P);
         }
     }
 }

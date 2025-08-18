@@ -297,3 +297,34 @@ Mesh Clipper::BackFaceCull_View(const Mesh& in, const Mat4x4& V) const
     }
     return out;
 }
+
+Mesh Clipper::BackFaceCull_View2(const Mesh& mesh, const Vec3& camera_pos) const
+{
+    Mesh out;
+    out.material = mesh.material;
+    out.vertices = mesh.vertices;
+    out.indices.reserve(mesh.indices.size());
+
+    const auto triCount = mesh.indices.size() / 3;
+
+    for (size_t t = 0; t < triCount; ++t)
+    {
+        const uint32_t i0 = mesh.indices[3*t + 0];
+        const uint32_t i1 = mesh.indices[3*t + 1];
+        const uint32_t i2 = mesh.indices[3*t + 2];
+
+        const Vec3 e1 = (mesh.vertices[i1].position - mesh.vertices[i0].position).ToVec3();
+        const Vec3 e2 = (mesh.vertices[i2].position - mesh.vertices[i0].position).ToVec3();
+        const Vec3 n  = Vec3::Cross(e1, e2);
+
+        const Vec3 to_camera_pos = camera_pos-mesh.vertices[i0].position.ToVec3();
+
+        if (Vec3::Dot(n, to_camera_pos) > 0.0f)
+        {
+            out.indices.push_back(i0);
+            out.indices.push_back(i1);
+            out.indices.push_back(i2);
+        }
+    }
+    return out;
+}

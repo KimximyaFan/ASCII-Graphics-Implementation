@@ -1,12 +1,9 @@
-Rasterize triangle 점검,
+Brick Texture 구현, edge 구현
+
+베이크 구조로 각종 프로시저럴 텍스쳐 구현
+
+
 렌더링시 discrete 하게 반짝이는거 수정, smoothe 했으면 좋겠음
-정점 값과 정보들 디버깅 테스트
-
-Entity vertex normal preprocess 구현
-Clipper Clip Mesh 비효율적인거 최적화
-
-@@
-Camera View Matrix 증명
 
 @@
 game 구현시 AABB 쪽 생각하고 개선해보기, 현재는 entity mesh 둘다 local aabb 가지고있고
@@ -16,18 +13,13 @@ game 구현시 AABB 쪽 생각하고 개선해보기, 현재는 entity mesh 둘�
 각종 함수 오버헤드나 불필요한 복사 있는지 점검
 
 @@
-Renderer에서 칼라 값에 따른 if 분기 char 만들기 (cartoon rendering)
-
-@@
-main 함수 만들기
-
-@@
 여유되면 삼각형 그리는 방법 바라센트릭 vs 스캔라인 비교해서 analysis
 
 @@
 ambient 구현 문제 (현재는 intensity에 계수 곱해서 쓰고 있음, 해당 씬의 gloabl ambient를 어떻게 구현할건지)
 
 @@
+Clipper Clip Mesh 비효율적인거 최적화
 clipper.cc 파일의 clipmesh 함수 최적화 (나중에)
 
 @@

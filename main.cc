@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
  
     scene.GetLightManager()->SetAmbient(Vec3(0.25f, 0.25f, 0.25f));
   
-    auto key_light = std::make_shared<Directional_Light>(Vec3(50, 100, 50), 1.0f);
+    auto key_light = std::make_shared<Directional_Light>(Vec3(50,  100, 50), 1.0f);
 
     scene.GetLightManager()->AddLight(key_light);
 
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     else
         entity = CreateTestCubeEntity(5.0);
 
-    scene.AddEntity(entity);  
+    scene.AddEntity(entity);   
  
     Renderer renderer(width, height);
     renderer.SetLightingModel(std::make_unique<Blinn_Phong>());
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
  
     //for (auto& col : renderer.GetFrameBuffer())
         //printf("r=%.2f g=%.2f b=%.2f ", col.r, col.g, col.b);
-    
+     
     constexpr float angularSpeed = 60.0f * 3.14159265f / 180.0f;
     auto lastTime = std::chrono::high_resolution_clock::now();
     int fps = 0;

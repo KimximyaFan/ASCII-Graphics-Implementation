@@ -26,7 +26,6 @@ public:
     void DrawMesh (const std::vector<std::shared_ptr<Light>>& lights, 
                    const Vec3& camaera_pos,
                    const Vec3& ambient,
-                   const Vec3& view_direction,
                    const Mesh& mesh,
                    const Clipper& clipper, 
                    Mat4x4 M, 

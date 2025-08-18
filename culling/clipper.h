@@ -42,6 +42,8 @@ public:
 
     Mesh BackFaceCull_View(const Mesh& in, const Mat4x4& V) const;
 
+    Mesh BackFaceCull_View2(const Mesh& in, const Vec3& camera_pos) const;
+
 private:
     std::array<Vec4, 6> frustum_planes;
 
