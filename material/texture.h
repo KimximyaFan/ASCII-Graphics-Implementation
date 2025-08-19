@@ -8,6 +8,7 @@
 
 enum class Texture_Handle : uint8_t
 {
+    CHECKER,
     BRICK,
     COUNT
 };

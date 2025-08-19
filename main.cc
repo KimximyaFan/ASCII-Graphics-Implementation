@@ -4,12 +4,13 @@
 #include "scene/light_manager.h"
 #include "math/vector.h"
 #include "light/directional_light.h"
-#include "test.h"
 #include "light_models/blinn_phong.h"
 #include "fps_counter/fps_counter.h"
 #include "io/input_handler.h"
 #include "io/output_handler.h"
 #include "rendering/renderer.h"
+#include "preprocess/test.h"
+#include "preprocess/texture_register.h"
 
 int main(int argc, char* argv[])
 {
@@ -17,6 +18,10 @@ int main(int argc, char* argv[])
     const int height = 30;
 
     Scene scene;
+
+    auto texture_manager_ptr = std::make_shared<Texture_Manager>();
+    TextureRegisterPreprocess(*texture_manager_ptr);
+    scene.SetTextureManager(texture_manager_ptr);
 
     Vec3 camera_pos = Vec3(5.5f, 5.5f, 5.5f);
     Vec3 camera_target = Vec3(0.0f, 0.0f, 0.0f);
@@ -47,10 +52,7 @@ int main(int argc, char* argv[])
 
     std::shared_ptr<Entity> entity;
  
-    if ( true )
-        entity = CreateCubeEntity_Flat24(5.0f);
-    else
-        entity = CreateTestCubeEntity(5.0);
+    entity = CreateCubeEntity_Flat24(5.0f);
 
     scene.AddEntity(entity);   
  

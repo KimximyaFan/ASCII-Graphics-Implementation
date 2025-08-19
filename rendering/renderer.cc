@@ -390,8 +390,8 @@ void Renderer::Render(const Scene& scene)
 
 */
 
-
-static inline Vec3 ExpectedFaceNormalAfterY(float deg, const Vec3& N0 /* MC face normal */)
+/*
+static inline Vec3 ExpectedFaceNormalAfterY(float deg, const Vec3& N0 MC face normal
 {
     const float rad = deg * 3.14159265f / 180.0f;
     const float c = std::cos(rad), s = std::sin(rad);
@@ -485,3 +485,4 @@ void Renderer::DebugShadeNoRaster_DirectionalOnly(const Scene& scene, float angl
         }
     }
 }
+*/

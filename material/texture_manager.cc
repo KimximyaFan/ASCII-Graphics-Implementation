@@ -108,7 +108,13 @@ bool Texture_Manager::RegisterImage(Texture_Handle handle, const char* path, con
     return true;
 }
 
-bool Texture_Manager::RegisterProcedural(Texture_Handle handle)
+bool Texture_Manager::RegisterProcedural(Texture_Handle handle, const std::vector<Color> pixels, int w, int h, const Sampler_Desc sampler)
 {
-    
+    if ( Is_Exist(handle) )
+        return false;
+
+    auto tex = std::make_unique<Image_Texture>(w, h, std::move(pixels));
+    tex->SetSampler(sampler);
+    registered_textures[ToIndex(handle)] = std::move(tex);
+    return true;
 }

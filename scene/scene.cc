@@ -57,3 +57,13 @@ void Scene::Update(float delta_time)
 
     light_manager->UpdateLights(delta_time);
 }
+
+void Scene::SetTextureManager(const std::shared_ptr<Texture_Manager>& tm)
+{
+    texture_manager = tm;
+}
+
+const std::shared_ptr<Texture_Manager>& Scene::GetTextureManager() const
+{
+    return texture_manager;
+}

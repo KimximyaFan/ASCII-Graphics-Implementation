@@ -38,7 +38,7 @@ public:
 
     void Render(const Scene& scene);
 
-    void DebugShadeNoRaster_DirectionalOnly(const Scene& scene, float angle_deg, const Vec3& dir_param);
+    //void DebugShadeNoRaster_DirectionalOnly(const Scene& scene, float angle_deg, const Vec3& dir_param);
 private:
     int width, height;
     Mat4x4 viewport_matrix;

@@ -5,6 +5,7 @@
 #include "entity.h"
 #include "light_manager.h"
 #include "camera.h"
+#include "material/texture_manager.h"
 
 class Scene
 {
@@ -24,9 +25,12 @@ public:
     void SetCamera(const std::shared_ptr<Camera>& camera);
     const std::shared_ptr<Camera>& GetCamera() const;
     void Update(float delta_time);
+    void SetTextureManager(const std::shared_ptr<Texture_Manager>& texture_manager);
+    const std::shared_ptr<Texture_Manager>& GetTextureManager() const;
 
 private:
     std::vector<std::shared_ptr<Entity>> entities;
     std::shared_ptr<Light_Manager> light_manager;
     std::shared_ptr<Camera> camera;
+    std::shared_ptr<Texture_Manager> texture_manager;
 };
