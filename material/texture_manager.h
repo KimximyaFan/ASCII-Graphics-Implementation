@@ -14,7 +14,7 @@ public:
     bool RegisterImage(Texture_Handle handle, const char* path, const Sampler_Desc sampler);
     bool RegisterProcedural(Texture_Handle handle, const std::vector<Color> pixels, int w, int h, const Sampler_Desc sampler);
 
-    const std::unique_ptr<Texture>& GetTexture(Texture_Handle handle) const;
+    const Texture* GetTexture(Texture_Handle handle) const;
 
 private:
     std::array < std::unique_ptr<Texture>, static_cast<size_t>(Texture_Handle::COUNT) > registered_textures;

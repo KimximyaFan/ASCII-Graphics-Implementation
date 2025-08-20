@@ -9,6 +9,7 @@
 #include "light_models/lighting_model.h"
 #include "scene/scene.h"
 #include "culling/clipper.h"
+#include "material/texture.h"
 
 class Renderer
 {
@@ -27,7 +28,8 @@ public:
                    const Vec3& camaera_pos,
                    const Vec3& ambient,
                    const Mesh& mesh,
-                   const Clipper& clipper, 
+                   const Clipper& clipper,
+                   const Texture* texture,
                    Mat4x4 M, 
                    Mat4x4 V, 
                    Mat4x4 P);
@@ -50,5 +52,7 @@ private:
 
     inline float GetTriangleSpace (const Projected_Vertex& A, const Projected_Vertex& B, const Projected_Vertex& C);
 
-    void RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vertex& v2);
+    void RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Texture* texture);
+
+    void RasterizeTriangle2 (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Texture* texture);
 };

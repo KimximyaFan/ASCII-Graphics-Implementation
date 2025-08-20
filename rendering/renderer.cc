@@ -34,41 +34,182 @@ void Renderer::SetLightingModel(std::unique_ptr<Lighting_Model> lighting)
     lighting_model = std::move(lighting);
 }
 
+
 Projected_Vertex Renderer::ProjectVertex (const Vertex& v)
 {
-    /*
-        Clip Position -> Nomalized Device Coordinate
-    */
+    
+    //    Clip Position -> Nomalized Device Coordinate
+    
     float invW = 1.0f / v.position.w;
     float ndcX = v.position.x * invW;
     float ndcY = v.position.y * invW;
     float ndcZ = v.position.z * invW;
 
-    /*
-        overhead
-    */
+    
+    //    overhead
+    
     //Mat4x4 viewport_matrix = Mat4x4::ViewportTransformation(0, width, 0, height);
     
-    /*
-        NDC -> Screen Coordinate
-    */
+    
+    //    NDC -> Screen Coordinate
+    
     Projected_Vertex out;
     out.invW = invW;
     out.x = (ndcX*0.5f + 0.5f) * width;
     // 배열의 y축은 위에서 아래로 가기때문에, y를 뒤집어줘야함, height - y 
     out.y = (1.0f - (ndcY*0.5f + 0.5f)) * height;
     out.z = ndcZ*0.5f + 0.5f;
-    out.color = { v.color.r, v.color.g, v.color.b, v.color.a };
+
+    out.r_over_w = v.color.r * invW;
+    out.g_over_w = v.color.g * invW;
+    out.b_over_w = v.color.b * invW;
+    out.u_over_w = v.uv.x * invW;
+    out.v_over_w = v.uv.y * invW;
 
     return out;
 }
 
+/*
+Projected_Vertex Renderer::ProjectVertex (const Vertex& v)
+{
+    // v는 이미 PV 곱해진 "clip 좌표"가 들어온다고 가정
+    float invW = 1.0f / v.position.w;
+    float ndcX = v.position.x * invW;
+    float ndcY = v.position.y * invW;
+    float ndcZ = v.position.z * invW;
+
+    Projected_Vertex out{};
+    out.invW  = invW;
+    out.x     = (ndcX*0.5f + 0.5f) * width;
+    // 화면 y는 위->아래 증가: NDC y를 뒤집어서 스크린으로
+    out.y     = (1.0f - (ndcY*0.5f + 0.5f)) * height;
+    out.z_ndc = ndcZ;
+    out.z     = ndcZ*0.5f + 0.5f; // [0,1]
+
+    // 퍼스펙티브 보정용 속성
+    out.r_over_w = v.color.r * invW;
+    out.g_over_w = v.color.g * invW;
+    out.b_over_w = v.color.b * invW;
+    out.u_over_w = v.uv.x     * invW;
+    out.v_over_w = v.uv.y     * invW;
+
+    // (디버깅용으로만 쓰는 값이면 유지, 아니면 불필요)
+    out.u = v.uv.x;
+    out.v = v.uv.y;
+    return out;
+}
+*/
 inline float Renderer::GetTriangleSpace (const Projected_Vertex& A,
                                         const Projected_Vertex& B,
                                         const Projected_Vertex& C)
 {
-    return (B.x-A.x)*(C.y-A.y) - (B.y-A.y)*(C.x-A.x);
+    return (B.y-A.y)*(C.x-A.x) - (B.x-A.x)*(C.y-A.y);
 }
+
+
+static inline float EdgeFn(float ax, float ay, float bx, float by, float px, float py)
+{
+    // (b - a) ⟂ · (p - a)  (스크린 좌표계 기준)
+    return (by - ay)*(px - ax) - (bx - ax)*(py - ay);
+}
+static inline bool IsTopLeft(float ax, float ay, float bx, float by)
+{
+    // 수평 에지는 왼쪽 끝을 포함, 수직/기울어진 에지는 위쪽 에지 포함
+    // 우리의 스크린좌표는 y가 아래로 증가하므로,
+    //  - "상단(top)" 에지는 ay < by 인 에지
+    //  - "좌측(left)" 에지는 ay == by && ax < bx 인 에지
+    if (ay == by) return ax < bx; // 수평 에지: 왼쪽 끝 포함
+    return ay < by;               // 상단 에지 포함
+}
+
+
+void Renderer::RasterizeTriangle2 (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Texture* texture)
+{
+    Projected_Vertex A = ProjectVertex(v0);
+    Projected_Vertex B = ProjectVertex(v1);
+    Projected_Vertex C = ProjectVertex(v2);
+
+    // 삼각형 외접 bbox
+    int x_min = std::max(0, (int)std::floor(std::min({A.x, B.x, C.x})));
+    int x_max = std::min(width-1,  (int)std::ceil (std::max({A.x, B.x, C.x})));
+    int y_min = std::max(0, (int)std::floor(std::min({A.y, B.y, C.y})));
+    int y_max = std::min(height-1, (int)std::ceil (std::max({A.y, B.y, C.y})));
+
+    // 전체 삼각형 부호있는 면적
+    float area = EdgeFn(A.x, A.y, B.x, B.y, C.x, C.y);
+    if (std::fabs(area) < 1e-8f) return;
+
+    // Top-Left 규칙에서 에지 포함 판정에 사용할 보정:
+    // 면적 부호를 양으로 맞추고(내부 계산 단순화), 에지 함수도 동일 부호로 맞춤
+    float orient = (area > 0.0f) ? 1.0f : -1.0f;
+    area *= orient;
+
+    // 에지의 top/left 여부 미리 계산
+    bool eAB_TL = IsTopLeft(A.x, A.y, B.x, B.y);
+    bool eBC_TL = IsTopLeft(B.x, B.y, C.x, C.y);
+    bool eCA_TL = IsTopLeft(C.x, C.y, A.x, A.y);
+
+    constexpr float Z_EPS = 1e-7f;
+
+    for (int y = y_min; y <= y_max; ++y)
+    {
+        float py = y + 0.5f; // 픽셀 센터
+        for (int x = x_min; x <= x_max; ++x)
+        {
+            float px = x + 0.5f;
+
+            // 에지 함수(부호 정규화)
+            float eAB = orient * EdgeFn(A.x, A.y, B.x, B.y, px, py);
+            float eBC = orient * EdgeFn(B.x, B.y, C.x, C.y, px, py);
+            float eCA = orient * EdgeFn(C.x, C.y, A.x, A.y, px, py);
+
+            // Top-Left 규칙: >0 포함, ==0 이면 top/left 에지만 포함
+            if ( (eAB < 0 || (eAB == 0 && !eAB_TL)) ||
+                 (eBC < 0 || (eBC == 0 && !eBC_TL)) ||
+                 (eCA < 0 || (eCA == 0 && !eCA_TL)) )
+                continue;
+
+            // barycentric (정규화)
+            float w0 = eBC / area; // A에 대응 (PBC)
+            float w1 = eCA / area; // B에 대응 (PCA)
+            float w2 = eAB / area; // C에 대응 (PAB)
+            // (합은 1이지만 부동오차로 약간 어긋날 수 있음)
+
+            // 깊이: 스크린에서 선형
+            float z = w0*A.z + w1*B.z + w2*C.z;
+
+            int index = y*width + x;
+            if (z > z_buffer[index] - Z_EPS) continue; // 타이브레이커
+
+            // 퍼스펙티브 보정
+            float denom = w0*A.invW + w1*B.invW + w2*C.invW;
+            if (!std::isfinite(denom)) continue;
+            if (std::fabs(denom) < 1e-20f) continue; // 안전
+
+            float u = (w0*A.u_over_w + w1*B.u_over_w + w2*C.u_over_w ) / denom; // ← 아래서 수정
+            float v = (w0*A.v_over_w + w1*B.v_over_w + w2*C.v_over_w) / denom;
+
+            // ↑ 오타 방지: C 쪽 u_over_w와 v_over_w를 정확히 사용하세요.
+            // 올바른 라인:
+            // float u = (w0*A.u_over_w + w1*B.u_over_w + w2*C.u_over_w) / denom;
+            // float v = (w0*A.v_over_w + w1*B.v_over_w + w2*C.v_over_w) / denom;
+
+            // 텍스처 샘플
+            Color tex = texture ? texture->Sample(u, v) : Color{1,1,1,1};
+
+            // (선택) 정점색도 퍼스펙티브 보정
+            Color col;
+            col.r = (w0*A.r_over_w + w1*B.r_over_w + w2*C.r_over_w) / denom;
+            col.g = (w0*A.g_over_w + w1*B.g_over_w + w2*C.g_over_w) / denom;
+            col.b = (w0*A.b_over_w + w1*B.b_over_w + w2*C.b_over_w) / denom;
+            col.a = 1.0f;
+
+            z_buffer[index] = z;
+            frame_buffer[index] = col * tex;
+        }
+    }
+}
+
 
 /*
     Barycentric Interpolation
@@ -79,7 +220,8 @@ inline float Renderer::GetTriangleSpace (const Projected_Vertex& A,
 
     z interpolation is same with z from A,B,C plane equation (proved)
 */
-void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vertex& v2)
+
+void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Texture* texture)
 {
     Projected_Vertex A = ProjectVertex(v0);
     Projected_Vertex B = ProjectVertex(v1);
@@ -95,31 +237,39 @@ void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vert
 
     if (fabs(area) < 1e-6f) return;
 
+    float orient = area > 0.0f ? 1.0f : -1.0f;
+    area *= orient;
+
     float inv_area = 1.0f/area;
 
     for (int y=y_min; y<=y_max; ++y)
     {
+        P.y = y+0.5f;
+
         for (int x=x_min; x<=x_max; ++x)
         {
             P.x = x+0.5f;
-            P.y = y+0.5f;
 
-            float w0 = GetTriangleSpace(A, B, P) * inv_area;
-            float w1 = GetTriangleSpace(B, C, P) * inv_area;
-            float w2 = GetTriangleSpace(C, A, P) * inv_area;
+            float w0 = orient * GetTriangleSpace(B, C, P) * inv_area;
+            float w1 = orient * GetTriangleSpace(C, A, P) * inv_area;
+            float w2 = orient * GetTriangleSpace(A, B, P) * inv_area;
 
-            if ( w0 < 0 || w1 < 0 || w2 < 0)
+            if ( w0 < 0.0f || w1 < 0.0f || w2 < 0.0f)
                 continue;
 
             //float denom = w0*A.invW + w1*B.invW + w2*C.invW;
 
             //if (denom <= 0.0f) continue;
 
-            //float depth = (w0*A.z*A.invW + w1*B.z*B.invW + w2*C.z*C.invW) / denom;
+            float z = w0*A.z + w1*B.z + w2*C.z;
             
-            float z = 1.0f / (w0/A.z + w1/B.z + w2/C.z);
+            //float z_ndc = w0*A.z_ndc + w1*B.z_ndc + w2*C.z_ndc;   // [-1,1]
+            //float z     = z_ndc * 0.5f + 0.5f;
+
+            //float z = 1.0f / (w0/A.z + w1/B.z + w2/C.z);
 
             int index = y*width + x;
+            
             /*
             Color col;
 
@@ -135,29 +285,41 @@ void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vert
                 frame_buffer[index] = col;
             */
             
-            if ( z < z_buffer[index] )
-            {
-                z_buffer[index] = z;
+            if ( z >= z_buffer[index] ) continue;
 
-                Color col;
-                
-                col.r = ((w0/A.z)*A.color.r + (w1/B.z)*B.color.r + (w2/C.z)*C.color.r) * z;
-                col.g = ((w0/A.z)*A.color.g + (w1/B.z)*B.color.g + (w2/C.z)*C.color.g) * z;
-                col.b = ((w0/A.z)*A.color.b + (w1/B.z)*B.color.b + (w2/C.z)*C.color.b) * z;
-                col.a = ((w0/A.z)*A.color.a + (w1/B.z)*B.color.a + (w2/C.z)*C.color.a) * z;
-                
-                
-                //col.r = (w0*A.color.r*A.invW + w1*B.color.r*B.invW + w2*C.color.r*C.invW) / denom;
-                //col.g = (w0*A.color.g*A.invW + w1*B.color.g*B.invW + w2*C.color.g*C.invW) / denom;
-                //col.b = (w0*A.color.b*A.invW + w1*B.color.b*B.invW + w2*C.color.b*C.invW) / denom;
-                //col.a = (w0*A.color.a*A.invW + w1*B.color.a*B.invW + w2*C.color.a*C.invW) / denom;
-                
-                frame_buffer[index] = col;
-            }
+            float denom = w0*A.invW + w1*B.invW + w2*C.invW;
+
+            //if (!(denom > 0.0f) || !std::isfinite(denom)) continue;
+            if (!std::isfinite(denom) || std::fabs(denom) < 1e-12f) continue;
+
+            //col.r = ((w0/A.z)*A.color.r + (w1/B.z)*B.color.r + (w2/C.z)*C.color.r) * z;
+            //col.g = ((w0/A.z)*A.color.g + (w1/B.z)*B.color.g + (w2/C.z)*C.color.g) * z;
+            //col.b = ((w0/A.z)*A.color.b + (w1/B.z)*B.color.b + (w2/C.z)*C.color.b) * z;
+            //col.a = ((w0/A.z)*A.color.a + (w1/B.z)*B.color.a + (w2/C.z)*C.color.a) * z;
             
+            float u = (w0*A.u_over_w + w1*B.u_over_w + w2*C.u_over_w) / denom;
+            float v = (w0*A.v_over_w + w1*B.v_over_w + w2*C.v_over_w) / denom;
+
+            //float u = w0*A.u + w1*B.u + w2*C.u;
+            //float v = w0*A.v + w1*B.v + w2*C.v;
+
+            Color tex = texture ? texture->Sample(u, v) : Color{1,1,1,1};
+            
+            Color col;
+            col.r = (w0*A.r_over_w + w1*B.r_over_w + w2*C.r_over_w) / denom;
+            col.g = (w0*A.g_over_w + w1*B.g_over_w + w2*C.g_over_w) / denom;
+            col.b = (w0*A.b_over_w + w1*B.b_over_w + w2*C.b_over_w) / denom;
+            col.a = 1.0f;
+
+            Color out = col * tex;
+            //col.a = (w0*A.color.a*A.invW + w1*B.color.a*B.invW + w2*C.color.a*C.invW) / denom;
+            
+            z_buffer[index] = z;
+            frame_buffer[index] = out;
         }
     }
 }
+
 
 /*
 
@@ -174,7 +336,8 @@ void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights,
                          const Vec3& camera_pos,
                          const Vec3& ambient,
                          const Mesh& mesh,
-                         const Clipper& clipper, 
+                         const Clipper& clipper,
+                         const Texture* texture, 
                          Mat4x4 M, 
                          Mat4x4 V, 
                          Mat4x4 P
@@ -244,7 +407,8 @@ void Renderer::DrawMesh (const std::vector<std::shared_ptr<Light>>& lights,
     {
         RasterizeTriangle(transformed_mesh.vertices[transformed_mesh.indices[i+0]], 
                           transformed_mesh.vertices[transformed_mesh.indices[i+1]], 
-                          transformed_mesh.vertices[transformed_mesh.indices[i+2]]);
+                          transformed_mesh.vertices[transformed_mesh.indices[i+2]],
+                          texture);
     }
 }
 
@@ -306,7 +470,7 @@ void Renderer::Render(const Scene& scene)
 
         for ( auto& mesh : e->parts )
         {
-            DrawMesh(lights, camera_pos, ambient, mesh, clipper, e->GetLocalToWorldMatrix(), V, P);
+            DrawMesh(lights, camera_pos, ambient, mesh, clipper, scene.GetTextureManager()->GetTexture(mesh.material->texture_handle), e->GetLocalToWorldMatrix(), V, P);
         }
     }
 }

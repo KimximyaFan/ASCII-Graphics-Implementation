@@ -56,71 +56,48 @@ std::vector<Color> Procedural_Texture::BakeBrick(int W, int H)
     if (W <= 0 || H <= 0) return {};
     std::vector<Color> pixels(static_cast<size_t>(W) * static_cast<size_t>(H));
 
-    // 기본값
-    constexpr int   bricksX   = 10;
-    constexpr int   bricksY   = 6;
-    constexpr float mortar    = 0.07f;   // 0..0.49 (셀 경계 폭 비율)
-    constexpr float variation = 0.12f;   // 0..1   (벽돌 밝기 변조)
-    const Color brickA {0.63f, 0.21f, 0.16f, 1.0f};
-    const Color brickB {0.55f, 0.18f, 0.12f, 1.0f};
-    const Color mortarC{0.80f, 0.80f, 0.80f, 1.0f};
+    // 벽돌이 "가로로 눕도록" 셀 가로>세로가 되게 설정 (정사각 텍스처 기준)
+    // => bricksY > bricksX 가 되면 셀 가로가 더 길어짐.
+    constexpr int   bricksX = 3;   // 가로 칸 수 (적게)
+    constexpr int   bricksY = 4;  // 세로 칸 수 (많게)
+    constexpr float mortarU = 0.08f; // 가로 줄눈 두께(셀 비율, 0~0.49)
+    constexpr float mortarV = 0.08f; // 세로 줄눈 두께(셀 비율, 0~0.49)
 
-    auto hash2i01 = [](int x, int y) -> float {
-        uint32_t h = static_cast<uint32_t>(x) * 374761393u + static_cast<uint32_t>(y) * 668265263u;
-        h = (h ^ (h >> 13)) * 1274126177u;
-        h ^= (h >> 16);
-        return static_cast<float>(h) * (1.0f / 4294967295.0f); // 0..1
-    };
+    // 밝은 벽돌 / 어두운 줄눈 (단색)
+    const Color brickC  {0.7f, 0.7f, 0.7f, 1.0f}; // 밝은 적갈색
+    const Color mortarC {0.01f, 0.01f, 0.01f, 1.0f}; // 어두운 콘크리트색
 
-    for (int y = 0; y < H; ++y) {
+    const float mu = std::min(std::max(mortarU, 0.0f), 0.49f);
+    const float mv = std::min(std::max(mortarV, 0.0f), 0.49f);
+
+    for (int y = 0; y < H; ++y)
+    {
         float v0 = (y + 0.5f) / static_cast<float>(H);
-        for (int x = 0; x < W; ++x) {
+        float v  = v0 - std::floor(v0);          // 0..1
+        float sv = v * bricksY;
+
+        int   row   = static_cast<int>(std::floor(sv)); // 0..bricksY-1
+        float fv    = sv - static_cast<float>(row);     // 0..1
+
+        for (int x = 0; x < W; ++x)
+        {
             float u0 = (x + 0.5f) / static_cast<float>(W);
+            float u  = u0 - std::floor(u0);      // 0..1
 
-            // [0,1) 래핑
-            float u = u0 - std::floor(u0);
-            float v = v0 - std::floor(v0);
+            // 러닝본드: 홀수 줄 0.5칸 시프트 (타일 이음새 맞도록 fract만 사용)
+            float su    = u * bricksX;
+            float suOff = su + ((row & 1) ? 0.5f : 0.0f);
+            float fu    = suOff - std::floor(suOff);     // 0..1
 
-            // 셀 좌표
-            float su = u * bricksX;
-            float sv = v * bricksY;
+            // 줄눈/벽돌 판정: 중앙 직사각형만 벽돌, 나머지는 줄눈
+            bool isBrick = (fu >= mu && fu <= 1.0f - mu &&
+                            fv >= mv && fv <= 1.0f - mv);
 
-            int   row   = static_cast<int>(sv);
-            float suOff = su + ((row & 1) ? 0.5f : 0.0f); // 홀수 줄 반칸 시프트
-            int   col   = static_cast<int>(suOff);
-
-            float fu = suOff - static_cast<float>(col); // 0..1
-            float fv = sv    - static_cast<float>(row); // 0..1
-
-            float m = std::clamp(mortar, 0.0f, 0.49f);
-            // 경계까지 거리(양쪽 중 더 가까운 쪽)
-            float du = (fu < 1.0f - fu) ? fu : (1.0f - fu);
-            float dv = (fv < 1.0f - fv) ? fv : (1.0f - fv);
-
-            if (du < m || dv < m) {
-                pixels[static_cast<size_t>(y) * W + x] = mortarC;
-                continue;
-            }
-
-            // 벽돌 색 + 변조
-            bool  useA = ((row ^ col) & 1) == 0;
-            Color base = useA ? brickA : brickB;
-
-            float rnd = hash2i01(col, row) * 2.0f - 1.0f;             // -1..1
-            float t   = std::clamp(0.5f + rnd * variation, 0.0f, 1.0f);
-
-            Color dark{ base.r * 0.7f, base.g * 0.7f, base.b * 0.7f, base.a };
-            Color lite{ base.r * 1.2f, base.g * 1.2f, base.b * 1.2f, base.a };
-
-            // lerp
-            Color out;
-            out.r = dark.r + (lite.r - dark.r) * t;
-            out.g = dark.g + (lite.g - dark.g) * t;
-            out.b = dark.b + (lite.b - dark.b) * t;
-            out.a = dark.a + (lite.a - dark.a) * t;
-
-            pixels[static_cast<size_t>(y) * W + x] = out;
+            pixels[static_cast<size_t>(y) * W + x] = isBrick ? brickC : mortarC;
         }
     }
     return pixels;
 }
+
+
+

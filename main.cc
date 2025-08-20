@@ -10,8 +10,8 @@
 #include "io/output_handler.h"
 #include "rendering/renderer.h"
 #include "preprocess/test.h"
-#include "preprocess/texture_register.h"
-
+#include "preprocess/texture_register.h" 
+  
 int main(int argc, char* argv[])
 {
     const int width  = 120;
@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
         near_plane,
         far_plane 
     );
-  
+    
     scene.SetCamera(camera_ptr);
  
     scene.GetLightManager()->SetAmbient(Vec3(0.25f, 0.25f, 0.25f));
@@ -51,8 +51,11 @@ int main(int argc, char* argv[])
     scene.GetLightManager()->AddLight(key_light);
 
     std::shared_ptr<Entity> entity;
- 
-    entity = CreateCubeEntity_Flat24(5.0f);
+    
+    if (true) 
+        entity = CreateCubeEntity_Flat24_Fixed(5.0f);
+    else
+        entity = CreateCubeEntity_Flat24_Debug(5.0f);
 
     scene.AddEntity(entity);   
  
@@ -63,7 +66,7 @@ int main(int argc, char* argv[])
 
     Fps_Counter fps_counter;
     fps_counter.Start();  
- 
+  
     //for (auto& col : renderer.GetFrameBuffer())
         //printf("r=%.2f g=%.2f b=%.2f ", col.r, col.g, col.b);
      
@@ -85,14 +88,14 @@ int main(int argc, char* argv[])
         printf("------------------------------------------------------------\n");
     }
     */      
-         
-      
+          
+    
     while ( Input_Handler::IsSpacePressed() == false )
     {
         auto now   = std::chrono::high_resolution_clock::now();
         float dt   = std::chrono::duration<float>(now - lastTime).count();
         lastTime   = now;
-
+ 
         // 2-b) 엔티티 회전 업데이트 (Y축 기준)
         entity->transform.SetRotation(
             entity->transform.GetRotation() + Vec3(0, angularSpeed * dt, 0)

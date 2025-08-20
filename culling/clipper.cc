@@ -41,18 +41,9 @@ Vertex Clipper::GetIntersectVertex(const Vec4& plane, const Vertex& a, const Ver
 
     Vertex result; 
     result.position = a.position + direction_vector * u;
-    result.color.r = a.color.r + (b.color.r - a.color.r) * u;
-    result.color.g = a.color.g + (b.color.g - a.color.g) * u; 
-    result.color.b = a.color.b + (b.color.b - a.color.b) * u;
-    result.color.a = a.color.a + (b.color.a - a.color.a) * u;
-    // 필요시 나머지 속성도 동일하게 보간
-    // 예) normal
-    // Vec3 dn = b.normal - a.normal;
-    // result.normal = Vec3::Normalize(a.normal + dn * t);
-    // 예) uv
-    // result.uv = a.uv + (b.uv - a.uv) * t;
-    // 예) color
-    // result.color = a.color + (b.color - a.color) * t;
+    result.color = a.color + (b.color - a.color) * u;
+    result.normal = Vec3::Normalize(a.normal + (b.normal - a.normal) * u);
+    result.uv = a.uv + (b.uv - a.uv) * u;
 
     return result;
 }

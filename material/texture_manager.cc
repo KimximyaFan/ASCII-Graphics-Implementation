@@ -1,12 +1,13 @@
+#define INITGUID
 #include "texture_manager.h"
 #include "image_texture.h"
 #include <windows.h>
 #include <wincodec.h>
 #include <string>
 
-const std::unique_ptr<Texture>& Texture_Manager::GetTexture(Texture_Handle handle) const
+const Texture* Texture_Manager::GetTexture(Texture_Handle handle) const
 {
-    return registered_textures[ToIndex(handle)];
+    return registered_textures[ToIndex(handle)].get();
 }
 
 bool Texture_Manager::Is_Exist(Texture_Handle handle) const
