@@ -1,134 +1,216 @@
-Projected_Vertex Renderer::ProjectVertex (const Vertex& v)
+class Input_Handler
 {
-    
-    //    Clip Position -> Nomalized Device Coordinate
-    
-    float invW = 1.0f / v.position.w;
-    float ndcX = v.position.x * invW;
-    float ndcY = v.position.y * invW;
-    float ndcZ = v.position.z * invW;
+public:
+    // hwnd==nullptr이면 콘솔 창 핸들을 자동 사용
+    explicit Input_Handler(HWND hwnd = nullptr, bool lockMouse = true);
+    ~Input_Handler();
 
-    
-    //    overhead
-    
-    //Mat4x4 viewport_matrix = Mat4x4::ViewportTransformation(0, width, 0, height);
-    
-    
-    //    NDC -> Screen Coordinate
-    
-    Projected_Vertex out;
-    out.invW = invW;
-    out.x = (ndcX*0.5f + 0.5f) * width;
-    // 배열의 y축은 위에서 아래로 가기때문에, y를 뒤집어줘야함, height - y 
-    out.y = (1.0f - (ndcY*0.5f + 0.5f)) * height;
-    out.z_ndc = ndcZ;
-    out.z = ndcZ*0.5f + 0.5f;
-    out.r_over_w = v.color.r * invW;
-    out.g_over_w = v.color.g * invW;
-    out.b_over_w = v.color.b * invW;
-    out.u_over_w = v.uv.x * invW;
-    out.v_over_w = v.uv.y * invW;
-    out.u = v.uv.x;
-    out.v = v.uv.y;
+    // 수명 관리
+    void Initialize();
+    void Shutdown();
 
-    return out;
+    // 매 프레임 1회 호출
+    void Poll();
+
+    // 키 상태
+    bool IsKeyDown(Key k) const;
+    bool WasKeyPressed(Key k) const;    // 이번 프레임에 눌림(엣지)
+    bool WasKeyReleased(Key k) const;   // 이번 프레임에 떼짐(엣지)
+
+    // 마우스 상대 이동(프레임 누적)
+    void GetMouseDelta(float& dx, float& dy) const; // 반환 후 값 유지(초기화X)
+
+    // 기존 API 호환
+    bool IsSpacePressed() const { return IsKeyDown(Key::Space); }
+
+    // 옵션
+    void SetPointerLock(bool enable);   // 런타임 토글
+    void SetMouseSensitivity(float s);  // 기본 1.0
+    void SetHWND(HWND hwnd);            // 창 전환 시
+
+private:
+    static int  ToVK(Key k);
+    bool        HasFocus_() const;
+    void        UpdateKeyboard_();
+    void        UpdateMouse_();
+
+private:
+    HWND  hwnd_ = nullptr;
+    bool  initialized_ = false;
+    bool  pointerLock_ = true;
+    bool  resetMouse_ = true;
+    float mouseSensitivity_ = 1.0f;
+
+    std::array<uint8_t, (size_t)Key::COUNT> curr_{};
+    std::array<uint8_t, (size_t)Key::COUNT> prev_{};
+
+    float mouseDX_ = 0.0f;
+    float mouseDY_ = 0.0f;
+
+    POINT prevPos_{0,0};   // lock=false 경로에서 사용
+};
+
+
+
+
+
+#include "Input_Handler.h"
+
+static inline int clampi(int v, int lo, int hi){ return v<lo?lo:(v>hi?hi:v); }
+
+Input_Handler::Input_Handler(HWND hwnd, bool lockMouse)
+: hwnd_(hwnd ? hwnd : GetConsoleWindow())
+, pointerLock_(lockMouse)
+{
+    // 배열/상태는 멤버 초기화자로 0
 }
 
+Input_Handler::~Input_Handler() {
+    Shutdown();
+}
 
-void Renderer::RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Texture* texture)
+void Input_Handler::Initialize()
 {
-    Projected_Vertex A = ProjectVertex(v0);
-    Projected_Vertex B = ProjectVertex(v1);
-    Projected_Vertex C = ProjectVertex(v2);
-    Projected_Vertex P;
+    if (initialized_) return;
+    if (!hwnd_) hwnd_ = GetConsoleWindow();
+    resetMouse_ = true;
+    if (pointerLock_ && HasFocus_()) ShowCursor(FALSE);
+    initialized_ = true;
+}
 
-    int x_min = std::max(0, (int)std::floor(std::min({A.x, B.x, C.x})));
-    int x_max = std::min(width-1, (int)std::ceil(std::max({A.x, B.x, C.x})));
-    int y_min = std::max(0, (int)std::floor(std::min({A.y, B.y, C.y})));
-    int y_max = std::min(height-1, (int)std::ceil(std::max({A.y, B.y, C.y})));
+void Input_Handler::Shutdown()
+{
+    if (!initialized_) return;
+    if (pointerLock_) ShowCursor(TRUE);
+    initialized_ = false;
+}
 
-    float area = GetTriangleSpace(A, B, C);
+void Input_Handler::SetHWND(HWND hwnd)
+{
+    hwnd_ = hwnd ? hwnd : GetConsoleWindow();
+    resetMouse_ = true;
+}
 
-    if (fabs(area) < 1e-6f) return;
+void Input_Handler::SetPointerLock(bool enable)
+{
+    if (pointerLock_ == enable) return;
+    pointerLock_ = enable;
+    resetMouse_ = true;
+    if (!initialized_) return;
+    if (pointerLock_ && HasFocus_()) ShowCursor(FALSE);
+    else                             ShowCursor(TRUE);
+}
 
-    float inv_area = 1.0f/area;
+void Input_Handler::SetMouseSensitivity(float s)
+{
+    mouseSensitivity_ = (s > 0.f ? s : 1.f);
+}
 
-    for (int y=y_min; y<=y_max; ++y)
+bool Input_Handler::HasFocus_() const
+{
+    return hwnd_ && (GetForegroundWindow() == hwnd_);
+}
+
+int Input_Handler::ToVK(Key k)
+{
+    switch (k)
     {
-        for (int x=x_min; x<=x_max; ++x)
-        {
-            P.x = x+0.5f;
-            P.y = y+0.5f;
+        case Key::W:         return 'W';
+        case Key::A:         return 'A';
+        case Key::S:         return 'S';
+        case Key::D:         return 'D';
+        case Key::LeftShift: return VK_SHIFT; // 좌/우 구분 없이
+        case Key::Space:     return VK_SPACE;
+        case Key::Escape:    return VK_ESCAPE;
+        case Key::Q:         return 'Q';
+        case Key::E:         return 'E';
+        default:             return 0;
+    }
+}
 
-            float w0 = GetTriangleSpace(A, B, P) * inv_area;
-            float w1 = GetTriangleSpace(B, C, P) * inv_area;
-            float w2 = GetTriangleSpace(C, A, P) * inv_area;
+void Input_Handler::Poll()
+{
+    if (!initialized_) Initialize();
+    UpdateKeyboard_();
+    UpdateMouse_();
+}
 
-            if ( w0 < 0 || w1 < 0 || w2 < 0)
-                continue;
+bool Input_Handler::IsKeyDown(Key k) const
+{
+    return curr_[(size_t)k] != 0;
+}
 
-            //float denom = w0*A.invW + w1*B.invW + w2*C.invW;
+bool Input_Handler::WasKeyPressed(Key k) const
+{
+    size_t i = (size_t)k;
+    return (curr_[i] != 0) && (prev_[i] == 0);
+}
 
-            //if (denom <= 0.0f) continue;
+bool Input_Handler::WasKeyReleased(Key k) const
+{
+    size_t i = (size_t)k;
+    return (curr_[i] == 0) && (prev_[i] != 0);
+}
 
-            //float z = w0*A.z + w1*B.z + w2*C.z;
-            
-            float z_ndc = w0*A.z_ndc + w1*B.z_ndc + w2*C.z_ndc;   // [-1,1]
-            float z     = z_ndc * 0.5f + 0.5f;
+void Input_Handler::GetMouseDelta(float& dx, float& dy) const
+{
+    dx = mouseDX_;
+    dy = mouseDY_;
+}
 
-            //float z = 1.0f / (w0/A.z + w1/B.z + w2/C.z);
+void Input_Handler::UpdateKeyboard_()
+{
+    prev_ = curr_;
+    for (size_t i = 0; i < (size_t)Key::COUNT; ++i)
+    {
+        int vk = ToVK((Key)i);
+        if (vk == 0) { curr_[i] = 0; continue; }
+        SHORT st = GetAsyncKeyState(vk);
+        curr_[i] = ( (st & 0x8000) != 0 ) ? 1 : 0;
+    }
+}
 
-            int index = y*width + x;
-            
-            Color col;
+void Input_Handler::UpdateMouse_()
+{
+    mouseDX_ = 0.0f;
+    mouseDY_ = 0.0f;
 
-            col.r = ((w0/A.z)*A.color.r + (w1/B.z)*B.color.r + (w2/C.z)*C.color.r) * z;
-            col.g = ((w0/A.z)*A.color.g + (w1/B.z)*B.color.g + (w2/C.z)*C.color.g) * z;
-            col.b = ((w0/A.z)*A.color.b + (w1/B.z)*B.color.b + (w2/C.z)*C.color.b) * z;
-            col.a = ((w0/A.z)*A.color.a + (w1/B.z)*B.color.a + (w2/C.z)*C.color.a) * z;
+    if (!HasFocus_()) {
+        resetMouse_ = true;
+        return;
+    }
 
-            float buffer_intensity = frame_buffer[index].r + frame_buffer[index].g + frame_buffer[index].b;
-            float current_intensity = col.r + col.g + col.b;
+    if (pointerLock_ && hwnd_)
+    {
+        RECT rc; GetClientRect(hwnd_, &rc);
+        // 콘솔 클라이언트 크기가 0일 수 있어 방지
+        int cx = clampi((rc.left + rc.right)/2, rc.left, rc.right);
+        int cy = clampi((rc.top  + rc.bottom)/2, rc.top,  rc.bottom);
+        POINT centerClient{ cx, cy };
+        POINT centerScreen = centerClient; ClientToScreen(hwnd_, &centerScreen);
 
-            if ( buffer_intensity < current_intensity )
-                frame_buffer[index] = col;
-            
-            
-            if ( z < z_buffer[index] )
-            {
-                float denom = w0*A.invW + w1*B.invW + w2*C.invW;
-
-                //if (!(denom > 0.0f) || !std::isfinite(denom)) continue;
-                if (!std::isfinite(denom) || std::fabs(denom) < 1e-12f) continue;
-
-                z_buffer[index] = z;
-
-                Color col;
-                
-                //col.r = ((w0/A.z)*A.color.r + (w1/B.z)*B.color.r + (w2/C.z)*C.color.r) * z;
-                //col.g = ((w0/A.z)*A.color.g + (w1/B.z)*B.color.g + (w2/C.z)*C.color.g) * z;
-                //col.b = ((w0/A.z)*A.color.b + (w1/B.z)*B.color.b + (w2/C.z)*C.color.b) * z;
-                //col.a = ((w0/A.z)*A.color.a + (w1/B.z)*B.color.a + (w2/C.z)*C.color.a) * z;
-                
-                float u = (w0*A.u_over_w + w1*B.u_over_w + w2*C.u_over_w) / denom;
-                float v = (w0*A.v_over_w + w1*B.v_over_w + w2*C.v_over_w) / denom;
-
-                //float u = w0*A.u + w1*B.u + w2*C.u;
-                //float v = w0*A.v + w1*B.v + w2*C.v;
-
-                Color tex = texture ? texture->Sample(u, v) : Color{1,1,1,1};
-                
-                col.r = (w0*A.r_over_w + w1*B.r_over_w + w2*C.r_over_w) / denom;
-                col.g = (w0*A.g_over_w + w1*B.g_over_w + w2*C.g_over_w) / denom;
-                col.b = (w0*A.b_over_w + w1*B.b_over_w + w2*C.b_over_w) / denom;
-                col.a = 1.0f;
-
-                Color out = col * tex;
-                //col.a = (w0*A.color.a*A.invW + w1*B.color.a*B.invW + w2*C.color.a*C.invW) / denom;
-                
-                frame_buffer[index] = out;
-            }
-            
+        if (resetMouse_) {
+            SetCursorPos(centerScreen.x, centerScreen.y);
+            resetMouse_ = false;
+            return; // 첫 프레임 델타 0
         }
+
+        POINT p; GetCursorPos(&p);
+        mouseDX_ = float(p.x - centerScreen.x) * mouseSensitivity_;
+        mouseDY_ = float(p.y - centerScreen.y) * mouseSensitivity_;
+
+        SetCursorPos(centerScreen.x, centerScreen.y);
+    }
+    else
+    {
+        POINT p; GetCursorPos(&p);
+        if (resetMouse_) {
+            prevPos_ = p;
+            resetMouse_ = false;
+            return;
+        }
+        mouseDX_ = float(p.x - prevPos_.x) * mouseSensitivity_;
+        mouseDY_ = float(p.y - prevPos_.y) * mouseSensitivity_;
+        prevPos_ = p;
     }
 }

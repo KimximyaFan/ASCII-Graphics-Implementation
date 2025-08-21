@@ -1,8 +1,13 @@
-Brick Texture 구현, edge 구현
+wasd input -> 카메라 wasd 이동 
+mouse input -> 카메라 회전
+바닥깔기
+array 기반으로 world 구성
 
-베이크 구조로 각종 프로시저럴 텍스쳐 구현
 
 
+
+
+@@
 렌더링시 discrete 하게 반짝이는거 수정, smoothe 했으면 좋겠음
 
 @@
@@ -16,20 +21,14 @@ game 구현시 AABB 쪽 생각하고 개선해보기, 현재는 entity mesh 둘�
 여유되면 삼각형 그리는 방법 바라센트릭 vs 스캔라인 비교해서 analysis
 
 @@
-ambient 구현 문제 (현재는 intensity에 계수 곱해서 쓰고 있음, 해당 씬의 gloabl ambient를 어떻게 구현할건지)
-
-@@
 Clipper Clip Mesh 비효율적인거 최적화
 clipper.cc 파일의 clipmesh 함수 최적화 (나중에)
 
 @@
 renderer.cc 파일의 drawmesh 최적화 가능
 (deep copy 부분 capacity 재사용, reserve and 직접복사, std::transform, gpu programming )
-
-
 깊은 복사(deep copy)의 비용
-매 Draw 호출마다 Mesh out_mesh = mesh; 로 벡터 데이터를 전부 복사하면,
-
+매 Draw 호출마다 Mesh out_mesh = mesh 로 벡터 데이터를 전부 복사하면,
 버텍스·인덱스 수가 많을수록 심각한 성능 저하를 유발합니다.
 
 @@
