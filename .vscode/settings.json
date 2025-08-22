@@ -54,7 +54,10 @@
     "cstdarg": "cpp",
     "ratio": "cpp",
     "iomanip": "cpp",
-    "sstream": "cpp"
+    "sstream": "cpp",
+    "semaphore": "cpp",
+    "stop_token": "cpp",
+    "thread": "cpp"
   },
 
   "code-runner.runInTerminal": true,

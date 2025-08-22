@@ -1,5 +1,4 @@
-wasd input -> 카메라 wasd 이동 
-mouse input -> 카메라 회전
+
 바닥깔기
 array 기반으로 world 구성
 

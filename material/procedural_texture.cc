@@ -11,7 +11,7 @@ std::vector<Color> Procedural_Texture::BakeChecker(int W, int H, bool antialias)
     constexpr int   tilesX = 8;
     constexpr int   tilesY = 8;
     const Color A{0.92f, 0.92f, 0.92f, 1.0f};
-    const Color B{0.08f, 0.08f, 0.08f, 1.0f};
+    const Color B{0.01f, 0.01f, 0.01f, 1.0f};
 
     const float du = antialias ? 0.25f / static_cast<float>(W) : 0.0f;
     const float dv = antialias ? 0.25f / static_cast<float>(H) : 0.0f;
@@ -58,14 +58,17 @@ std::vector<Color> Procedural_Texture::BakeBrick(int W, int H)
 
     // 벽돌이 "가로로 눕도록" 셀 가로>세로가 되게 설정 (정사각 텍스처 기준)
     // => bricksY > bricksX 가 되면 셀 가로가 더 길어짐.
-    constexpr int   bricksX = 3;   // 가로 칸 수 (적게)
-    constexpr int   bricksY = 4;  // 세로 칸 수 (많게)
-    constexpr float mortarU = 0.08f; // 가로 줄눈 두께(셀 비율, 0~0.49)
-    constexpr float mortarV = 0.08f; // 세로 줄눈 두께(셀 비율, 0~0.49)
+    constexpr int   bricksX = 1;   // 가로 칸 수 (적게)
+    constexpr int   bricksY = 2;  // 세로 칸 수 (많게)
+    constexpr float mortarU = 0.12f; // 가로 줄눈 두께(셀 비율, 0~0.49)
+    constexpr float mortarV = 0.12f; // 세로 줄눈 두께(셀 비율, 0~0.49)
 
     // 밝은 벽돌 / 어두운 줄눈 (단색)
-    const Color brickC  {0.7f, 0.7f, 0.7f, 1.0f}; // 밝은 적갈색
+    const Color brickC  {0.8f, 0.8f, 0.8f, 1.0f}; // 밝은 적갈색
     const Color mortarC {0.01f, 0.01f, 0.01f, 1.0f}; // 어두운 콘크리트색
+
+    //const Color mortarC  {0.7f, 0.7f, 0.7f, 1.0f}; // 밝은 적갈색
+    //const Color brickC {0.01f, 0.01f, 0.01f, 1.0f}; // 어두운 콘크리트색
 
     const float mu = std::min(std::max(mortarU, 0.0f), 0.49f);
     const float mv = std::min(std::max(mortarV, 0.0f), 0.49f);

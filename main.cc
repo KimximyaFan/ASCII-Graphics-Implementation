@@ -10,14 +10,19 @@
 #include "io/output_handler.h"
 #include "rendering/renderer.h"
 #include "preprocess/test.h"
-#include "preprocess/texture_register.h" 
-  
+#include "preprocess/texture_register.h"
+#include "world/camera_controller.h"
+#include "world/world.h"
+#include "world/test_world.h"
+
 int main(int argc, char* argv[])
 {
     const int width  = 120;
     const int height = 30;
 
     Scene scene;
+
+    auto input_handler = std::make_shared<Input_Handler>(nullptr, true);
 
     auto texture_manager_ptr = std::make_shared<Texture_Manager>();
     TextureRegisterPreprocess(*texture_manager_ptr);
@@ -32,7 +37,7 @@ int main(int argc, char* argv[])
     float near_plane = -0.1f;
     float far_plane = -50.0f;
  
-    auto camera_ptr = std::make_shared<Camera>(
+    auto camera = std::make_shared<Camera>(
         camera_pos,
         camera_target,
         camera_up,
@@ -41,23 +46,38 @@ int main(int argc, char* argv[])
         near_plane,
         far_plane 
     );
+
+    auto camera_controller = std::make_shared<Camera_Controller>(input_handler, camera);
     
-    scene.SetCamera(camera_ptr);
- 
-    scene.GetLightManager()->SetAmbient(Vec3(0.25f, 0.25f, 0.25f));
+    scene.SetCamera(camera);
+
+    scene.GetLightManager()->SetAmbient(Vec3(0.30f, 0.30f, 0.30f));
   
     auto key_light = std::make_shared<Directional_Light>(Vec3(50,  100, 50), 1.0f);
 
     scene.GetLightManager()->AddLight(key_light);
 
+    /*
     std::shared_ptr<Entity> entity;
     
     if (true) 
         entity = CreateCubeEntity_Flat24_Fixed(5.0f);
     else
-        entity = CreateCubeEntity_Flat24_Debug(5.0f);
+        entity = CreateCubeEntity_Fla t24_Debug(5.0f);
 
-    scene.AddEntity(entity);   
+    scene.AddEntity(entity);
+    */
+     
+    std::unique_ptr<World> world = std::make_unique<Test_World>();
+    world->SetWorld();
+    auto world_info = world->GetWorldInfo();
+
+    for (const std::shared_ptr<Entity>& entity : world_info )
+    {
+        scene.AddEntity(entity);
+    }
+
+    camera->SetPosition(world_info[0]->transform.position);
  
     Renderer renderer(width, height);
     renderer.SetLightingModel(std::make_unique<Blinn_Phong>());
@@ -66,41 +86,20 @@ int main(int argc, char* argv[])
 
     Fps_Counter fps_counter;
     fps_counter.Start();  
-  
-    //for (auto& col : renderer.GetFrameBuffer())
-        //printf("r=%.2f g=%.2f b=%.2f ", col.r, col.g, col.b);
-     
-    constexpr float angularSpeed = 60.0f * 3.14159265f / 180.0f;
+
     auto lastTime = std::chrono::high_resolution_clock::now();
     int fps = 0;
-    
-    // 라이트 dir 파라미터(바로 아래 라인 중요!)
-    //Vec3 light_dir_param = Vec3(100,100,100);   // ← 지금 코드 유지(윗면은 안 맞음)
-                                                // 윗면(+Y)도 맞게 하려면 Vec3(-100,-100,-100) 으로 바꿔라.
-    /*
-    const int degs[12] = {30,60,90,120,150,180,210,240,270,300,330,360};
-    for (int k = 0; k < 12; ++k)
-    { 
-        const float deg = (float)degs[k];
-        entity->transform.SetRotation(Vec3(0.0f, deg * 3.14159265f / 180.0f, 0.0f));
 
-        renderer.DebugShadeNoRaster_DirectionalOnly(scene, deg, light_dir_param);
-        printf("------------------------------------------------------------\n");
-    }
-    */      
-          
-    
-    while ( Input_Handler::IsSpacePressed() == false )
+    while ( true )
     {
         auto now   = std::chrono::high_resolution_clock::now();
         float dt   = std::chrono::duration<float>(now - lastTime).count();
         lastTime   = now;
- 
-        // 2-b) 엔티티 회전 업데이트 (Y축 기준)
-        entity->transform.SetRotation(
-            entity->transform.GetRotation() + Vec3(0, angularSpeed * dt, 0)
-        );
-        
+
+        input_handler->Poll();
+        if (input_handler->IsKeyDown(Key::SPACE)) break;
+        camera_controller->Update(dt);
+
         renderer.Render(scene);
         output_handler.PrintBuffer(renderer.GetFrameBuffer(), fps);
         fps = fps_counter.Get_Fps();
