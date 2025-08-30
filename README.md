@@ -31,6 +31,9 @@ GPT 적극적으로 활용
 <br>
 <br>
 
+[![Watch the video](https://img.youtube.com/vi/DEqXNfs_HhY/maxresdefault.jpg)](https://youtu.be/DEqXNfs_HhY) <br>
+(클릭하면 유튜브 영상으로 넘어감)
+
 위 영상을 보고
 
 막연히 저런거 한번 만들어봐야겠다는 생각을 평소 가지고있었고, <br>
