@@ -23,7 +23,6 @@ public:
 
     void SetLightingModel (std::unique_ptr<Lighting_Model> lighting);
 
-    // mvp : Model View Projection
     void DrawMesh (const std::vector<std::shared_ptr<Light>>& lights, 
                    const Vec3& camaera_pos,
                    const Vec3& ambient,
@@ -40,7 +39,6 @@ public:
 
     void Render(const Scene& scene);
 
-    //void DebugShadeNoRaster_DirectionalOnly(const Scene& scene, float angle_deg, const Vec3& dir_param);
 private:
     int width, height;
     Mat4x4 viewport_matrix;
@@ -53,6 +51,4 @@ private:
     inline float GetTriangleSpace (const Projected_Vertex& A, const Projected_Vertex& B, const Projected_Vertex& C);
 
     void RasterizeTriangle (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Texture* texture);
-
-    void RasterizeTriangle2 (const Vertex& v0, const Vertex& v1, const Vertex& v2, const Texture* texture);
 };

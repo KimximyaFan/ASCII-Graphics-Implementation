@@ -36,13 +36,7 @@ public:
 
     void ExtractFrustumPlanes(const Mat4x4& proj_view);
 
-    Mesh BackFaceRemoval(const Mesh& mesh, const Vec3& view_direction) const;
-
-    Mesh BackFaceRemoval2(const Mesh& in, const Mat4x4& V) const;
-
-    Mesh BackFaceCull_View(const Mesh& in, const Mat4x4& V) const;
-
-    Mesh BackFaceCull_View2(const Mesh& in, const Vec3& camera_pos) const;
+    Mesh BackFaceRemoval(const Mesh& in, const Mat4x4& V) const;
 
 private:
     std::array<Vec4, 6> frustum_planes;

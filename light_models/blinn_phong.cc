@@ -15,7 +15,6 @@ Color Blinn_Phong::Shade(
     float intensity, N_L, N_H;
     float diffuse = 0.0, specular = 0.0;
     float result_diffuse = 0.0, result_specular = 0.0;
-
     Vec3 normalize_N = Vec3::Normalize(N);
     Vec3 normalize_V = Vec3::Normalize(V);
 
